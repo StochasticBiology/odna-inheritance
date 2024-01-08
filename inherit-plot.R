@@ -24,7 +24,7 @@ sub = df[df$DUI == 1 & df$LEAKAGE == 0.05,]
 g4 = ggplot(sub, aes(x=c/100,y=propA,color=factor(MU))) + geom_jitter(width=0.01, height=0.01, alpha=0.2)  +ylim(c(-0.1,1.1)) + facet_wrap(~t) + labs(color='1 DUI 1 leak') 
 #g4 = ggplot(sub, aes(x=c,y=a)) + geom_bin2d() + xlim(c(0,100)) + ylim(c(0,100)) + facet_wrap(~t)
 
-png(paste(c("env-comm-", env, ".png"), collapse=""), width=800, height=600)
+png(paste(c("inherit-env-", env, ".png"), collapse=""), width=800, height=600)
 grid.arrange(g1,g2,g3,g4,nrow=2,top = textGrob(exptstring[env+1],gp=gpar(fontsize=20,font=3)))
 dev.off()
 }
@@ -44,7 +44,7 @@ for(env in c(0,1,3,4)) {
   g4 = ggplot(sub, aes(x=t,y=f,color=factor(expt),fill=factor(expt))) + geom_smooth(alpha=0.05) +  theme(legend.position = "none") # labs(color='1 DUI 1 leak') 
   #g4 = ggplot(sub, aes(x=c,y=a)) + geom_bin2d() + xlim(c(0,100)) + ylim(c(0,100)) + facet_wrap(~t)
   
-  png(paste(c("env-comm-trace-", env, ".png"), collapse=""), width=800, height=600)
+  png(paste(c("inherit-trace-", env, ".png"), collapse=""), width=800, height=600)
   grid.arrange(g1,g2,g3,g4,nrow=2,top = textGrob(exptstring[env+1],gp=gpar(fontsize=20,font=3)))
   dev.off()
 }
