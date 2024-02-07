@@ -30,7 +30,10 @@ double fitness(Ind I, int env, int t, double scale, double penalty)
     case 6: fitness = (t/100 % 2 == 0 ? I.a+scale*I.b : I.b+scale*I.a);
     default: fitness = -1;
     }
-  h = I.b / (I.a+I.b);
+  if(I.a + I.b > 0)
+    h = I.b / (I.a+I.b);
+  else
+    h = 0;
   fitness -= penalty*h*(1-h);
   return (fitness < 0 ? 0 : fitness);
 }
@@ -95,13 +98,13 @@ int main(int argc, char *argv[])
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-full-out-%i-%.3f-%.3f.csv", env, scale, penalty);
+  sprintf(fstr, "inherit-full-out-%i-%.3f.csv", env, penalty);
   fp = fopen(fstr, "w");
   fprintf(fp, "scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-mean-out-%i-%.3f-%.3f.csv", env, scale, penalty);
+  sprintf(fstr, "inherit-mean-out-%i-%.3f.csv", env, penalty);
   fpm = fopen(fstr, "w");
   fprintf(fpm, "scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f\n");
 #endif
