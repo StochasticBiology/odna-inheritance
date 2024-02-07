@@ -95,13 +95,13 @@ int main(int argc, char *argv[])
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-full-out-%i-%.3f.csv", env, penalty);
+  sprintf(fstr, "inherit-full-out-%i-%.3f-%.3f.csv", env, scale, penalty);
   fp = fopen(fstr, "w");
   fprintf(fp, "scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-mean-out-%i-%.3f.csv", env, penalty);
+  sprintf(fstr, "inherit-mean-out-%i-%.3f-%.3f.csv", env, scale, penalty);
   fpm = fopen(fstr, "w");
   fprintf(fpm, "scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f\n");
 #endif
