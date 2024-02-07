@@ -21,13 +21,13 @@ double fitness(Ind I, int env, int t, double scale, double penalty)
   
   switch(env)
     {
-    case 0: fitness = (I.a+I.b);
-    case 1: fitness = (I.a+scale*I.b);
-    case 2: fitness = (I.b+scale*I.a);
-    case 3: fitness = (t % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b);
-    case 4: fitness = (t/10 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b);
-    case 5: fitness = (t/100 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b);
-    case 6: fitness = (t/100 % 2 == 0 ? I.a+scale*I.b : I.b+scale*I.a);
+    case 0: fitness = (I.a+I.b); break;
+    case 1: fitness = (I.a+scale*I.b); break;
+    case 2: fitness = (I.b+scale*I.a); break;
+    case 3: fitness = (t % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
+    case 4: fitness = (t/10 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
+    case 5: fitness = (t/100 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
+    case 6: fitness = (t/100 % 2 == 0 ? I.a+scale*I.b : I.b+scale*I.a); break;
     default: fitness = -1;
     }
   if(I.a + I.b > 0)
@@ -98,19 +98,19 @@ int main(int argc, char *argv[])
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-full-out-%i-%.3f.csv", env, penalty);
+  sprintf(fstr, "inherit-full-out-%i-%.3f-%.3f.csv", env, scale, penalty);
   fp = fopen(fstr, "w");
   fprintf(fp, "scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-mean-out-%i-%.3f.csv", env, penalty);
+  sprintf(fstr, "inherit-mean-out-%i-%.3f-%.3f.csv", env, scale, penalty);
   fpm = fopen(fstr, "w");
   fprintf(fpm, "scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f\n");
 #endif
   
   // loop over different environment types
-  for(env = 0; env <= 6; env++)
+  //  for(env = 0; env <= 6; env++)
     {
       // loop over DNA population size
       for(NDNA = 10; NDNA < 200; NDNA *= 1.5)
