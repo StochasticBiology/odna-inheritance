@@ -30,11 +30,9 @@ double fitness(Ind I, int env, int t, double scale, double penalty)
     case 6: fitness = (t/100 % 2 == 0 ? I.a+scale*I.b : I.b+scale*I.a); break;
     default: fitness = -1;
     }
-  if(I.a + I.b > 0)
-    h = I.b / (I.a+I.b);
-  else
-    h = 0;
-  fitness -= penalty*h*(1-h);
+  h = (I.b < I.a ? I.b : I.a);
+
+  fitness -= penalty*h;
   return (fitness < 0 ? 0 : fitness);
 }
 
