@@ -26,14 +26,17 @@ for(scale in c("0.000", "0.500")) {
       mean.df$meanmean[i] = mean(long.df$mean.f[long.df$env == mean.df$env[i] &
                                                   long.df$nDNA == mean.df$nDNA[i] &
                                                   long.df$mu == mean.df$mu[i] &
-                                                  long.df$leakage == mean.df$leakage[i]])
+                                                  long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
       mean.df$meanvar[i] = mean(long.df$var.f[long.df$env == mean.df$env[i] &
                                                 long.df$nDNA == mean.df$nDNA[i] &
                                                 long.df$mu == mean.df$mu[i] &
-                                                long.df$leakage == mean.df$leakage[i]])
+                                                long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
     }
     
-    g.dui0 = ggplot(mean.df, aes(x=my.trans(leakage),y=log(nDNA, base=1.5),fill=meanmean/nDNA)) + 
+    g.dui0 = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
+      scale_x_continuous(trans = "log", labels = scales::label_number(accuracy = 1e-4)) + 
+      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1)) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       geom_tile() + facet_grid(mu ~ env)
     
     long.df = df[df$DUI == 1 & df$t == 1950,]
@@ -45,16 +48,19 @@ for(scale in c("0.000", "0.500")) {
       mean.df$meanmean[i] = mean(long.df$mean.f[long.df$env == mean.df$env[i] &
                                                   long.df$nDNA == mean.df$nDNA[i] &
                                                   long.df$mu == mean.df$mu[i] &
-                                                  long.df$leakage == mean.df$leakage[i]])
+                                                  long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
       mean.df$meanvar[i] = mean(long.df$var.f[long.df$env == mean.df$env[i] &
                                                 long.df$nDNA == mean.df$nDNA[i] &
                                                 long.df$mu == mean.df$mu[i] &
-                                                long.df$leakage == mean.df$leakage[i]])
+                                                long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
     }
     
-    g.dui1 = ggplot(mean.df, aes(x=my.trans(leakage),y=log(nDNA, base=1.5),fill=meanmean/nDNA)) + 
+    g.dui1 = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
+      scale_x_continuous(trans = "log", labels = scales::label_number(accuracy = 1e-4)) + 
+      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1)) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       geom_tile() + facet_grid(mu ~ env)
-    
+
     print(paste0("Outputting ", scale, " ", penalty))
     
     sf = 2
@@ -75,3 +81,4 @@ for(scale in c("0.000", "0.500")) {
     
   }
 }
+
