@@ -34,11 +34,13 @@ for(scale in c("0.000", "0.500")) {
     }
     
     g.dui0 = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
-      scale_x_continuous(trans = "log", labels = scales::label_number(accuracy = 1e-4)) + 
-      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1)) +
+      scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0)) +
       geom_tile() + facet_grid(mu ~ env)
     
+    ##### first look at the long-time behaviour (**NOT guaranteed to be steady state!)
     long.df = df[df$DUI == 1 & df$t == 1950,]
     
     mean.df = long.df[long.df$expt==0,]
@@ -56,9 +58,10 @@ for(scale in c("0.000", "0.500")) {
     }
     
     g.dui1 = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
-      scale_x_continuous(trans = "log", labels = scales::label_number(accuracy = 1e-4)) + 
-      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1)) +
+      scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0)) +
       geom_tile() + facet_grid(mu ~ env)
 
     print(paste0("Outputting ", scale, " ", penalty))
@@ -82,3 +85,39 @@ for(scale in c("0.000", "0.500")) {
   }
 }
 
+g.baseline = list()
+for(scale in c("0.000", "0.500")) {
+  for(penalty in c("0.000", "1.000")) {
+    
+    # read in all parallelised outputs for a given scale/penalty combination
+    df = data.frame()
+    for(expt in 0:1) {
+      tdf = read.csv(paste0("inherit-baseline-mean-out-", expt, "-", scale, "-", penalty, ".csv"))
+      df = rbind(df, tdf)
+    }
+    df = df[!is.na(df$expt),]
+    
+    long.df = df[df$DUI == 0 & df$t == 4950,]
+    
+    mean.df = long.df[long.df$expt==0,]
+    mean.df$meanmean = 0
+    mean.df$meanvar = 0
+    for(i in 1:nrow(mean.df)) {
+      mean.df$meanmean[i] = mean(long.df$mean.f[long.df$env == mean.df$env[i] &
+                                                  long.df$nDNA == mean.df$nDNA[i] &
+                                                  long.df$mu == mean.df$mu[i] &
+                                                  long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
+      mean.df$meanvar[i] = mean(long.df$var.f[long.df$env == mean.df$env[i] &
+                                                long.df$nDNA == mean.df$nDNA[i] &
+                                                long.df$mu == mean.df$mu[i] &
+                                                long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
+    }
+    g.baseline[[length(g.baseline)+1]] = ggplot(mean.df, aes(x=mu, y=nDNA, fill=meanmean/nDNA)) + geom_tile() +
+      scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2)) +
+      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0))
+    
+  }
+}
+ggarrange(plotlist = g.baseline, labels = c("A. 0, 0", "B. 0, 1", "C. 0.5, 0", "D. 0.5, 1"))
