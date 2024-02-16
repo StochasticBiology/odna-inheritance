@@ -3,7 +3,7 @@
 #include <math.h>
 
 #define RND drand48()    // random number between 0 and 1
-#define NPOP 100         // population size
+#define MAXPOP 1000         // population size
 #define NGEN 2000        // number of generations in simulation
 #define NSAMP 100        // number of samples to run
 
@@ -66,8 +66,8 @@ int binomial(int n, double p)
 
 int main(int argc, char *argv[])
 {
-  Ind I[NPOP], newI[NPOP];
-  double f[NPOP], cs[NPOP];
+  Ind I[MAXPOP], newI[MAXPOP];
+  double f[MAXPOP], cs[MAXPOP];
   int i, j;
   int t;
   int mum, dad;
@@ -85,26 +85,28 @@ int main(int argc, char *argv[])
   double meanf, varf;
   char fstr[100];
   double scale, penalty;
+  int NPOP;
   
   if(argc != 4) {
-    printf("Please specify environmental protocol (0-6), fitness scale, and heteroplasmy penalty\n");
+    printf("Please specify population size, environmental protocol (0-6), fitness scale, and heteroplasmy penalty\n");
     exit(0);
   }
-  env = atoi(argv[1]);
-  scale = atof(argv[2]);
-  penalty = atof(argv[3]);
+  NPOP = atoi(argv[1]);
+  env = atoi(argv[2]);
+  scale = atof(argv[3]);
+  penalty = atof(argv[4]);
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-full-out-%i-%.3f-%.3f.csv", env, scale, penalty);
+  sprintf(fstr, "inherit-full-out-%i-%i-%.3f-%.3f.csv", NPOP, env, scale, penalty);
   fp = fopen(fstr, "w");
-  fprintf(fp, "scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
+  fprintf(fp, "Npop,scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-mean-out-%i-%.3f-%.3f.csv", env, scale, penalty);
+  sprintf(fstr, "inherit-mean-out-%i-%i-%.3f-%.3f.csv", NPOP, env, scale, penalty);
   fpm = fopen(fstr, "w");
-  fprintf(fpm, "scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f\n");
+  fprintf(fpm, "Npop,scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f\n");
 #endif
   
   // loop over different environment types
@@ -167,7 +169,7 @@ int main(int argc, char *argv[])
 				  for(i = 0; i < NPOP; i++)
 				    varf += (f[i]-meanf)*(f[i]-meanf);
 				  varf /= (NPOP-1);
-				  fprintf(fpm, "%f,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f\n", scale, penalty, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf);
+				  fprintf(fpm, "%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f\n", NPOP, scale, penalty, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf);
 				}
 #endif
 			      
@@ -177,7 +179,7 @@ int main(int argc, char *argv[])
 				{
 				  if(t == 10 || t == 100 || t == 500 || t == 900)
 				    {
-				      fprintf(fp, "%f,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", scale,penalty,env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
+				      fprintf(fp, "%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, scale,penalty,env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
 				    }
 				}
 #endif
