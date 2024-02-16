@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
   double scale, penalty;
   int NPOP;
   
-  if(argc != 4) {
+  if(argc != 5) {
     printf("Please specify population size, environmental protocol (0-6), fitness scale, and heteroplasmy penalty\n");
     exit(0);
   }
