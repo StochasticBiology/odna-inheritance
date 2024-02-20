@@ -93,10 +93,17 @@ gcc -o3 baseline-single.c -lm -o baseline-single.ce
 
 gcc -o3 inherit-zoom.c -lm -o inherit-zoom.ce
 
+./inherit-zoom.ce 0 0.5 0 > tmp &
+./inherit-zoom.ce 2 0.5 0 > tmp &
 ./inherit-zoom.ce 3 0.5 0 > tmp &
 ./inherit-zoom.ce 4 0.5 0 > tmp &
 ./inherit-zoom.ce 5 0.5 0 > tmp &
+./inherit-zoom.ce 6 0.5 0 > tmp &
 ./inherit-zoom.ce 7 0.5 0 > tmp &
 ./inherit-zoom.ce 8 0.5 0 > tmp &
 ./inherit-zoom.ce 9 0.5 0 > tmp &
 ./inherit-zoom.ce 10 0.5 0 > tmp &
+./inherit-zoom.ce 20 0.5 0 > tmp &
+./inherit-zoom.ce 50 0.5 0 > tmp &
+./inherit-zoom.ce 100 0.5 0 > tmp &
+./inherit-zoom.ce 200 0.5 0 > tmp &

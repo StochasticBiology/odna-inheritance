@@ -5,7 +5,7 @@
 #define RND drand48()    // random number between 0 and 1
 #define NPOP 100         // population size
 #define NGEN 2000        // number of generations in simulation
-#define NSAMP 1000        // number of samples to run
+#define NSAMP 100        // number of samples to run
 
 #define _MEANOUTPUT
 
@@ -18,23 +18,12 @@ typedef struct {
 double fitness(Ind I, int env, int t, double scale, double penalty)
 {
   double h, fitness;
-  
-  switch(env)
-    {
-    case 0: fitness = (I.a+I.b); break;
-    case 1: fitness = (I.a+scale*I.b); break;
-    case 2: fitness = (I.b+scale*I.a); break;
-    case 3: fitness = (t % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
-    case 4: fitness = (t/10 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
-    case 5: fitness = (t/100 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
-    case 6: fitness = (t/100 % 2 == 0 ? I.a+scale*I.b : I.b+scale*I.a); break;
-    case 7: fitness = (t/5 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
-    case 8: fitness = (t/20 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
-    case 9: fitness = (t/50 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
-    case 10: fitness = (t/200 % 2 == 0 ? I.b+scale*I.a : I.a+scale*I.b); break;
 
-    default: fitness = -1;
-    }
+  if(env == 0)
+     fitness = (I.a+scale*I.b);
+  else
+     fitness = (t % env == 0 ? I.a+scale*I.b : I.b+scale*I.a);
+  
   h = (I.b < I.a ? I.b : I.a);
 
   fitness -= penalty*h;
@@ -92,7 +81,7 @@ int main(int argc, char *argv[])
   double scale, penalty;
   
   if(argc != 4) {
-    printf("Please specify environmental protocol (0-6), fitness scale, and heteroplasmy penalty\n");
+    printf("Please specify environmental change period, fitness scale, and heteroplasmy penalty\n");
     exit(0);
   }
   env = atoi(argv[1]);
@@ -116,7 +105,7 @@ int main(int argc, char *argv[])
   //  for(env = 0; env <= 6; env++)
     {
       // loop over DNA population size
-      for(NDNA = 10; NDNA < 500; NDNA *= 1.5)
+      for(NDNA = 10; NDNA < 1000; NDNA *= 1.5)
 	{
 	  // loop over different mutation rates
 	  // for(MU = 0; MU <= 0.01; MU *= 10)
