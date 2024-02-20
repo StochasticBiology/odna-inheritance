@@ -94,6 +94,7 @@ gcc -o3 baseline-single.c -lm -o baseline-single.ce
 gcc -o3 inherit-zoom.c -lm -o inherit-zoom.ce
 
 ./inherit-zoom.ce 0 0.5 0 > tmp &
+./inherit-zoom.ce 1 0.5 0 > tmp &
 ./inherit-zoom.ce 2 0.5 0 > tmp &
 ./inherit-zoom.ce 3 0.5 0 > tmp &
 ./inherit-zoom.ce 4 0.5 0 > tmp &

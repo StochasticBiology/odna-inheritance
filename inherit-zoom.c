@@ -22,7 +22,7 @@ double fitness(Ind I, int env, int t, double scale, double penalty)
   if(env == 0)
      fitness = (I.a+scale*I.b);
   else
-     fitness = (t % env == 0 ? I.a+scale*I.b : I.b+scale*I.a);
+     fitness = (t/env % 2 == 0 ? I.a+scale*I.b : I.b+scale*I.a);
   
   h = (I.b < I.a ? I.b : I.a);
 
