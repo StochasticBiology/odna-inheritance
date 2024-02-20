@@ -84,6 +84,10 @@ gcc -o3 baseline.c -lm -o baseline.ce
 ./baseline.ce 200 0 0.5 1 > tmp &
 ./baseline.ce 200 1 0.5 1 > tmp &
 
+gcc -o3 baseline-single.c -lm -o baseline-single.ce
+
+./baseline-single.ce 100 0 0.5 0 > tmp &
+
 # argumnets to the zoomed-in simulation code are
 # environment, fitness of less good allele, heteroplasmy penalty
 
