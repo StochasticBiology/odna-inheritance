@@ -1,14 +1,14 @@
 library(ggplot2)
 library(ggpubr)
 
-npop = 200
+npop = 50
 
 ###### phase space behaviour
 # wrapper script currently only supports loop for npop = 100.
 # for npop = 100, comment l8 and use l9-10; otherwise comment l9-10 and use l8 
 scale = "0.500"; penalty = "0.000"; {{
-  #for(scale in c("0.000", "0.500")) {
-  #  for(penalty in c("0.000", "1.000")) {
+#  for(scale in c("0.000", "0.500")) {
+#    for(penalty in c("0.000", "1.000")) {
   
   # read in all parallelised outputs for a given scale/penalty combination
   df = data.frame()
@@ -23,7 +23,7 @@ scale = "0.500"; penalty = "0.000"; {{
   }
   
   ##### first look at the long-time behaviour (**NOT guaranteed to be steady state!)
-  long.df = df[df$DUI == 0 & df$t == 1950,]
+  long.df = df[df$DUI == 0 & df$t == 1995,]
   
   mean.df = long.df[long.df$expt==0,]
   mean.df$meanmean = 0
@@ -47,7 +47,7 @@ scale = "0.500"; penalty = "0.000"; {{
     geom_tile() + facet_grid(mu ~ env)
   
   ##### first look at the long-time behaviour (**NOT guaranteed to be steady state!)
-  long.df = df[df$DUI == 1 & df$t == 1950,]
+  long.df = df[df$DUI == 1 & df$t == 1995,]
   
   mean.df = long.df[long.df$expt==0,]
   mean.df$meanmean = 0
