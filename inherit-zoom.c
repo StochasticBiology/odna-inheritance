@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
   double meanf, varf;
   char fstr[100];
   double scale, penalty;
+  int reporttime;
   
   if(argc != 4) {
     printf("Please specify environmental change period, fitness scale, and heteroplasmy penalty\n");
@@ -154,7 +155,9 @@ int main(int argc, char *argv[])
 				cs[i] /= cs[NPOP-1];
 
 #ifdef _MEANOUTPUT
-			      if((expt < 4 && t % 50 == 0) || t == 1995)
+			      if(env == 0) reporttime = 1999;
+			      else reporttime = ((int)(2000./env))*env - 1;
+			      if((expt < 4 && t % 50 == 0) || t == reporttime)
 				{
 				  meanf = varf = 0;
 				  for(i = 0; i < NPOP; i++)
