@@ -1,6 +1,11 @@
 library(ggplot2)
 library(ggpubr)
 
+logit = function(x) {
+  xt = x
+  return(log(xt/(1-xt)))
+}
+
 npop = 50
 
 ###### phase space behaviour
@@ -91,7 +96,61 @@ scale = "0.500"; penalty = "0.000"; {{
 }
 }
 
-##### "baseline" behaviour -- no mutation or DUI or env change
+########### zoomed-in region for simple case
+
+
+scale = "0.500"
+penalty = "0.000"
+df = data.frame()
+for(expt in c(0:10,20,50,100,200)) {
+  tdf = read.csv(paste0("inherit-zoom-mean-out-", expt, "-", scale, "-", penalty, ".csv"))
+  df = rbind(df, tdf)
+}
+df = df[!is.na(df$expt),]
+
+df$period = as.numeric(df$env)
+
+long.df = df[df$DUI == 0 & df$t > 1900,]
+
+mean.df = long.df[long.df$expt==0,]
+mean.df$meanmean = 0
+mean.df$meanvar = 0
+for(i in 1:nrow(mean.df)) {
+  mean.df$meanmean[i] = mean(long.df$mean.f[long.df$env == mean.df$env[i] &
+                                              long.df$nDNA == mean.df$nDNA[i] &
+                                              long.df$mu == mean.df$mu[i] &
+                                              long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
+  mean.df$meanvar[i] = mean(long.df$var.f[long.df$env == mean.df$env[i] &
+                                            long.df$nDNA == mean.df$nDNA[i] &
+                                            long.df$mu == mean.df$mu[i] &
+                                            long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
+}
+
+g.zoom = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+  geom_tile() + facet_wrap(~ period)
+
+g.zoom
+
+sf = 2
+png(paste0("zoom-region.png"), width=800*sf, height=600*sf, res=72*sf)
+print(g.zoom)
+dev.off()
+
+# empirical fit to fitness behaviour for constant environments
+mean.df$leakage01 = 0
+mean.df$leakage01[mean.df$leakage > 0] = 1
+ggplot(mean.df[mean.df$env==0,]) +
+  geom_point(aes(x=mu, y=logit(meanmean/nDNA), color=factor(leakage))) + 
+  geom_line(aes(x=mu, y=-log(mu*nDNA**1.65)+2*leakage01, color=factor(leakage))) + 
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+  facet_wrap(~ nDNA)
+
+
+##### "baseline" behaviour -- no leakage or DUI or env change
 
 g.baseline = list()
 for(scale in c("0.000", "0.500")) {
@@ -165,50 +224,6 @@ print(ggarrange(g.baseline[[3]] + xlab("mu, 1e-6 = 0"),
 dev.off()
 
 
-########### zoomed-in region for simple case
-
-# read in all parallelised outputs for a given scale/penalty combination
-scale = "0.500"
-penalty = "0.000"
-df = data.frame()
-for(expt in c(3,4,5,7,8,9,10)) {
-  tdf = read.csv(paste0("oldzoom/inherit-zoom-mean-out-", expt, "-", scale, "-", penalty, ".csv"))
-  df = rbind(df, tdf)
-}
-df = df[!is.na(df$expt),]
-env.names = c("", "", "1", "10", "100", "", "5", "20", "50", "200")
-df$period = as.numeric(env.names[df$env])
-
-##### first look at the long-time behaviour (**NOT guaranteed to be steady state!)
-long.df = df[df$DUI == 0 & df$t == 1995,]
-
-mean.df = long.df[long.df$expt==0,]
-mean.df$meanmean = 0
-mean.df$meanvar = 0
-for(i in 1:nrow(mean.df)) {
-  mean.df$meanmean[i] = mean(long.df$mean.f[long.df$env == mean.df$env[i] &
-                                              long.df$nDNA == mean.df$nDNA[i] &
-                                              long.df$mu == mean.df$mu[i] &
-                                              long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
-  mean.df$meanvar[i] = mean(long.df$var.f[long.df$env == mean.df$env[i] &
-                                            long.df$nDNA == mean.df$nDNA[i] &
-                                            long.df$mu == mean.df$mu[i] &
-                                            long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
-}
-
-g.zoom = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-  geom_tile() + facet_wrap(~ period)
-
-g.zoom
-
-sf = 2
-png(paste0("zoom-region.png"), width=800*sf, height=600*sf, res=72*sf)
-print(g.zoom)
-dev.off()
 
 ######## baseline behaviour for single oDNA per cell
 
@@ -219,6 +234,10 @@ npop = 100; expt = 0
 df = data.frame()
 tdf = read.csv(paste0("inherit-baseline-single-mean-out-", npop, "-", expt, "-", scale, "-", penalty, ".csv"))
 df = rbind(df, tdf)
+tdf = read.csv(paste0("inherit-baseline-mean-out-", npop, "-", expt, "-", scale, "-", penalty, ".csv"))
+tdf$Npop=100
+df = rbind(df, tdf)
+
 df = df[!is.na(df$expt),]
 
 long.df = df[df$DUI == 0 & df$t == 4950,]
@@ -237,9 +256,38 @@ for(i in 1:nrow(mean.df)) {
                                             long.df$mu == mean.df$mu[i] &
                                             long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
 }
-ggplot(mean.df, aes(x=mu, y=nDNA, fill=meanmean/nDNA)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0))
+
+
+#log((1-mu)/(1-(1-mu)))
+#= log((1-mu)/mu)
+#= log(1/mu - 1)
+# ~= log(1/mu)
+
+# we have a choice of just matching the f > 0.5 behaviour -- which we csn do with a 1-f(mu, N) form 
+# or matching the full sigmoid, which needs logit-like terms
+
+### sigmoid picture
+ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=mu, y=logit(meanmean/nDNA), color=factor(nDNA))) +
+  geom_line(aes(x=mu, y=-log(mu*nDNA**1.65), color=factor(nDNA))) +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) #+ ylim(NA,5)
+
+# transformed -- N=1 case not so well fit, but full sigmoid shape captured
+ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=mu, y=meanmean/nDNA, color=factor(nDNA))) +
+  geom_line(aes(x=mu, y=1/(1+ mu*nDNA**1.65), color=factor(nDNA))) +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) #+ ylim(NA,5)
+
+# predicted vs observed
+ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=1/(1+ mu*nDNA**1.65), y=meanmean/nDNA, color=factor(nDNA))) +
+  # geom_line(aes(x=mu, y=1/(1+ mu*nDNA**1.65), color=factor(nDNA))) +
+  # scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) #+ ylim(NA,5)
+
+### 1-mu picture for f > 0.05  -- N=1 case better fit, but tails no good
+ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=mu, y=meanmean/nDNA, color=factor(nDNA))) +
+  geom_line(aes(x=mu, y=1-mu*nDNA**1.65, color=factor(nDNA))) +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylim(0.,1)
+
 
