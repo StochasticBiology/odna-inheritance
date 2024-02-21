@@ -240,7 +240,7 @@ df = rbind(df, tdf)
 
 df = df[!is.na(df$expt),]
 
-long.df = df[df$DUI == 0 & df$t == 4950,]
+long.df = df[df$DUI == 0 & df$t == 1995,]
 long.df$mu[long.df$mu == 0] = 1e-6
 
 mean.df = long.df[long.df$expt==0,]
@@ -268,25 +268,25 @@ for(i in 1:nrow(mean.df)) {
 
 ### sigmoid picture
 ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=mu, y=logit(meanmean/nDNA), color=factor(nDNA))) +
-  geom_line(aes(x=mu, y=-log(mu*nDNA**1.65), color=factor(nDNA))) +
+  geom_line(aes(x=mu, y=-log(mu*nDNA**0.5), color=factor(nDNA))) +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) #+ ylim(NA,5)
 
 # transformed -- N=1 case not so well fit, but full sigmoid shape captured
 ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=mu, y=meanmean/nDNA, color=factor(nDNA))) +
-  geom_line(aes(x=mu, y=1/(1+ mu*nDNA**1.65), color=factor(nDNA))) +
+  geom_line(aes(x=mu, y=1/(1+ mu*nDNA**0.5), color=factor(nDNA))) +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) #+ ylim(NA,5)
 
 # predicted vs observed
-ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=1/(1+ mu*nDNA**1.65), y=meanmean/nDNA, color=factor(nDNA))) +
-  # geom_line(aes(x=mu, y=1/(1+ mu*nDNA**1.65), color=factor(nDNA))) +
+ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=1/(1+ mu*nDNA**0.5), y=meanmean/nDNA, color=factor(nDNA))) +
+  # geom_line(aes(x=mu, y=1/(1+ mu*nDNA**0.5), color=factor(nDNA))) +
   # scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) #+ ylim(NA,5)
 
 ### 1-mu picture for f > 0.05  -- N=1 case better fit, but tails no good
 ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=mu, y=meanmean/nDNA, color=factor(nDNA))) +
-  geom_line(aes(x=mu, y=1-mu*nDNA**1.65, color=factor(nDNA))) +
+  geom_line(aes(x=mu, y=1-mu*nDNA**0.5, color=factor(nDNA))) +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylim(0.,1)
 
