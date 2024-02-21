@@ -48,7 +48,7 @@ scale = "0.500"; penalty = "0.000"; {{
     scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
     scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0)) +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
     geom_tile() + facet_grid(mu ~ env)
   
   ##### first look at the long-time behaviour (**NOT guaranteed to be steady state!)
@@ -72,7 +72,7 @@ scale = "0.500"; penalty = "0.000"; {{
     scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
     scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0)) +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
     geom_tile() + facet_grid(mu ~ env)
   
   print(paste0("Outputting ", scale, " ", penalty))
@@ -145,10 +145,9 @@ mean.df$leakage01 = 0
 mean.df$leakage01[mean.df$leakage > 0] = 1
 ggplot(mean.df[mean.df$env==0,]) +
   geom_point(aes(x=mu, y=logit(meanmean/nDNA), color=factor(leakage))) + 
-  geom_line(aes(x=mu, y=-log(mu*nDNA**1.65)+2*leakage01, color=factor(leakage))) + 
+  geom_line(aes(x=mu, y=-log(mu*nDNA**0.5)+2*leakage01, color=factor(leakage))) + 
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
   facet_wrap(~ nDNA)
-
 
 ##### "baseline" behaviour -- no leakage or DUI or env change
 
@@ -184,7 +183,7 @@ for(scale in c("0.000", "0.500")) {
       scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2)) +
       scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-      scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0))
+      scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1))
     
   }
 }
