@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
   //  for(env = 0; env <= 6; env++)
   {
     // loop over DNA population size
-    for(NDNA = 10; NDNA < 200; NDNA *= 1.2)
+    for(NDNA = 10; NDNA < 1000; NDNA *= 2)
       {
 	// loop over different mutation rates
 	for(MU = 0; MU <= 0.01; MU *= 2)
