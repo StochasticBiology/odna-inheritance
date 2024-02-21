@@ -6,7 +6,7 @@ logit = function(x) {
   return(log(xt/(1-xt)))
 }
 
-npop = 50
+npop = 100
 
 ###### phase space behaviour
 # wrapper script currently only supports loop for npop = 100.
@@ -164,7 +164,7 @@ for(scale in c("0.000", "0.500")) {
     }
     df = df[!is.na(df$expt),]
     
-    long.df = df[df$DUI == 0 & df$t == 4950,]
+    long.df = df[df$DUI == 0 & df$t == 1995,]
     long.df$mu[long.df$mu == 0] = 1e-6
     
     mean.df = long.df[long.df$expt==0,]
