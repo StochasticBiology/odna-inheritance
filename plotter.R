@@ -8,6 +8,8 @@ logit = function(x) {
 
 npop = 100
 
+sf = 2
+
 ###### phase space behaviour
 # wrapper script currently only supports loop for npop = 100.
 # for npop = 100, comment l8 and use l9-10; otherwise comment l9-10 and use l8 
@@ -97,17 +99,25 @@ scale = "0.500"; penalty = "0.000"; {{
 }
 
 # empirical fit to fitness behaviour for constant environments
-ggplot(mean.df[mean.df$env==0,], 
-       aes(x=1- mu*(nDNA**0.5)/(1-leakage), y=meanmean/nDNA, color=factor(leakage))) + 
-  geom_point() #+ geom_line() 
-
 fit.df = mean.df[mean.df$env == 0 & mean.df$meanmean/mean.df$nDNA != 1,]
 fit.df$x = 1- fit.df$mu*(fit.df$nDNA**0.5)/(1-fit.df$leakage)
 fit.df$y = fit.df$meanmean/fit.df$nDNA
-summary(lm(y ~ x, data=fit.df))
+my.fit = summary(lm(y ~ x, data=fit.df))
+plot.title = paste0("Empirical fit for constant environments\nR^2 = ", round(my.fit$r.squared, digits=3))
+
+emp.fit.g = ggplot(fit.df, aes(x=x, y=y, color=factor(leakage))) + 
+  geom_point() + #+ geom_line() 
+  labs(x="1 - mu*sqrt(nDNA)/(1 - lambda)", y="meanf", color="lambda") +
+  geom_abline() +
+  ggtitle(plot.title)
+
+emp.fit.g
+
+png("empirical-fit.png", width=400*sf, height=400*sf, res=72*sf)
+print(emp.fit.g)
+dev.off()
 
 ########### zoomed-in region for simple case
-
 
 scale = "0.500"
 penalty = "0.000"
