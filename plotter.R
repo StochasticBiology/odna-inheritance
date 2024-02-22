@@ -53,6 +53,13 @@ scale = "0.500"; penalty = "0.000"; {{
     scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
     geom_tile() + facet_grid(mu ~ env)
   
+  g.baseline = ggplot(mean.df[mean.df$env==0,], aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    geom_tile() + facet_grid(~ mu)
+  
   ##### first look at the long-time behaviour (**NOT guaranteed to be steady state!)
   long.df = df[df$DUI == 1 & df$t == 1995,]
   
@@ -115,6 +122,10 @@ emp.fit.g
 
 png("empirical-fit.png", width=400*sf, height=400*sf, res=72*sf)
 print(emp.fit.g)
+dev.off()
+
+png("baseline-and-fit.png", width=800*sf, height=300*sf, res=72*sf)
+ggarrange(g.baseline, emp.fit.g, nrow = 1, widths=c(2,1), labels=c("A", "B"))
 dev.off()
 
 ########### zoomed-in region for simple case
