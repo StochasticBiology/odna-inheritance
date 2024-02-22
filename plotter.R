@@ -46,7 +46,7 @@ scale = "0.500"; penalty = "0.000"; {{
   
   g.dui0 = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
     scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
     geom_tile() + facet_grid(mu ~ env)
@@ -70,7 +70,7 @@ scale = "0.500"; penalty = "0.000"; {{
   
   g.dui1 = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
     scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
     geom_tile() + facet_grid(mu ~ env)
@@ -95,6 +95,16 @@ scale = "0.500"; penalty = "0.000"; {{
   
 }
 }
+
+# empirical fit to fitness behaviour for constant environments
+ggplot(mean.df[mean.df$env==0,], 
+       aes(x=1- mu*(nDNA**0.5)/(1-leakage), y=meanmean/nDNA, color=factor(leakage))) + 
+  geom_point() #+ geom_line() 
+
+fit.df = mean.df[mean.df$env == 0 & mean.df$meanmean/mean.df$nDNA != 1,]
+fit.df$x = 1- fit.df$mu*(fit.df$nDNA**0.5)/(1-fit.df$leakage)
+fit.df$y = fit.df$meanmean/fit.df$nDNA
+summary(lm(y ~ x, data=fit.df))
 
 ########### zoomed-in region for simple case
 
@@ -140,14 +150,6 @@ png(paste0("zoom-region.png"), width=800*sf, height=600*sf, res=72*sf)
 print(g.zoom)
 dev.off()
 
-# empirical fit to fitness behaviour for constant environments
-mean.df$leakage01 = 0
-mean.df$leakage01[mean.df$leakage > 0] = 1
-ggplot(mean.df[mean.df$env==0,]) +
-  geom_point(aes(x=mu, y=logit(meanmean/nDNA), color=factor(leakage))) + 
-  geom_line(aes(x=mu, y=-log(mu*nDNA**0.5)+2*leakage01, color=factor(leakage))) + 
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
-  facet_wrap(~ nDNA)
 
 ##### "baseline" behaviour -- no leakage or DUI or env change
 
@@ -181,7 +183,7 @@ for(scale in c("0.000", "0.500")) {
     }
     g.baseline[[length(g.baseline)+1]] = ggplot(mean.df, aes(x=mu, y=nDNA, fill=meanmean/nDNA)) + geom_tile() +
       scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2)) +
-      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100)) +
+      scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1))
     
@@ -193,33 +195,15 @@ ggarrange(plotlist = g.baseline, labels = c("A. 0, 0", "B. 0, 1", "C. 0.5, 0", "
 
 ########### trying to collapse "baseline" behaviour into a trend
 
-stat.df = mean.df
-stat.df$response = mean.df$meanmean/mean.df$nDNA
-
-my.lm = lm(log(response/(1-(response*0.9999))) ~ log(mu) + log(nDNA), 
-           data=stat.df[stat.df$env==0,])
-summary(my.lm)
-#plot(my.lm)
-
-ggplot(stat.df[stat.df$env==0,], aes(x=-1.11-1.18*log(mu)-1.81*log(nDNA), y=log(response/(1-response*0.9999)), color=factor(nDNA))) + geom_line() 
-
-ggplot(stat.df[stat.df$env==0,], aes(x=-1.11-1.18*log(mu)-1.81*log(nDNA), y=log(response/(1-response)), color=factor(nDNA))) + geom_line() 
-
-my.lm = lm(log(response/(1-(response*0.9999))) ~ log(mu) + log(nDNA), 
-           data=stat.df[stat.df$env==0 & stat.df$nDNA <= 80,])
-summary(my.lm)
-#plot(my.lm)
-
-ggplot(stat.df[stat.df$env==0,], aes(x=-1*log(mu)-2*log(nDNA), y=log(response/(1-response*0.9999)), color=factor(nDNA))) + geom_line() 
-ggplot(stat.df[stat.df$env==0,], aes(x=-1*log(mu)-2*log(nDNA), y=log(response/(1-response*0.9999)), color=factor(nDNA))) + geom_line() 
-
-baseline.fit.g = ggplot(stat.df[stat.df$env==0,], aes(x=-1.11-1.18*log(mu)-1.81*log(nDNA), y=log(response/(1-response)), color=factor(nDNA))) + geom_line() 
+baseline.fit.g = ggplot(mean.df[mean.df$env==0,], 
+                        aes(x=1- mu*nDNA**0.5, y=meanmean/nDNA, color=factor(nDNA))) + 
+  geom_point() #+ geom_line() 
 
 sf = 2
 png(paste0("baseline-standard-", npop, ".png"), width=1000*sf, height=500*sf, res=72*sf)
 print(ggarrange(g.baseline[[3]] + xlab("mu, 1e-6 = 0"),
                 baseline.fit.g,
-                labels = c("A. Baseline behaviour after 5000 gen", "B. Fit to logit-transformed heteroplasmy")))
+                labels = c("A. Baseline behaviour after 1999 gen", "B. Fit: fitness ~ 1-mu*sqrt(nDNA)")))
 dev.off()
 
 
@@ -289,4 +273,13 @@ ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=mu, y=me
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylim(0.,1)
 
+# predicted vs observed
+ggplot(mean.df[mean.df$meanmean/mean.df$nDNA != 1,]) + geom_point(aes(x=1- mu*nDNA**0.5, y=meanmean/nDNA, color=factor(nDNA))) +
+  # geom_line(aes(x=mu, y=1/(1+ mu*nDNA**0.5), color=factor(nDNA))) +
+  # scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) #+ ylim(NA,5)
 
+to.fit = mean.df[mean.df$meanmean/mean.df$nDNA != 1,]
+to.fit$y = to.fit$meanmean/to.fit$nDNA
+to.fit$x = 1- to.fit$mu*to.fit$nDNA**0.5
+summary(lm(y ~ x, data=to.fit))
