@@ -88,7 +88,7 @@ gcc -o3 baseline-single.c -lm -o baseline-single.ce
 
 ./baseline-single.ce 100 0 0.5 0 > tmp &
 
-# argumnets to the zoomed-in simulation code are
+# arguments to the zoomed-in simulation code are
 # environment, fitness of less good allele, heteroplasmy penalty
 
 gcc -o3 inherit-zoom.c -lm -o inherit-zoom.ce
@@ -108,3 +108,6 @@ gcc -o3 inherit-zoom.c -lm -o inherit-zoom.ce
 ./inherit-zoom.ce 50 0.5 0 > tmp &
 ./inherit-zoom.ce 100 0.5 0 > tmp &
 ./inherit-zoom.ce 200 0.5 0 > tmp &
+
+
+

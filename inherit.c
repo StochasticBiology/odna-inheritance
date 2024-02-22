@@ -3,7 +3,7 @@
 #include <math.h>
 
 #define RND drand48()    // random number between 0 and 1
-#define MAXPOP 1000         // population size
+#define MAXPOP 1000        // population size
 #define NGEN 2000        // number of generations in simulation
 #define NSAMP 100        // number of samples to run
 
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
   //  for(env = 0; env <= 6; env++)
     {
       // loop over DNA population size
-      for(NDNA = 10; NDNA < 200; NDNA *= 1.5)
+      for(NDNA = 10; NDNA < 1000; NDNA *= 2)
 	{
 	  // loop over different mutation rates
 	  for(MU = 0; MU <= 0.01; MU *= 10)
@@ -205,10 +205,12 @@ int main(int argc, char *argv[])
 				    }
 
 				  // construct new individual's genetic makeup from binomial draws with mean (1-leak)*mother + leak*father
-				  newI[i].a = binomial(I[dad].a, LEAKAGE) + binomial(I[mum].a, 1.-LEAKAGE);
-				  newI[i].b = binomial(I[dad].b, LEAKAGE) + binomial(I[mum].b, 1.-LEAKAGE);
-				  newI[i].c = binomial(I[dad].c, LEAKAGE) + binomial(I[mum].c, 1.-LEAKAGE);
-
+				  do{ 
+				  newI[i].a = binomial(I[dad].a, 0.5*LEAKAGE) + binomial(I[mum].a, 0.5*(1.-LEAKAGE));
+				  newI[i].b = binomial(I[dad].b, 0.5*LEAKAGE) + binomial(I[mum].b, 0.5*(1.-LEAKAGE));
+				  newI[i].c = binomial(I[dad].c, 0.5*LEAKAGE) + binomial(I[mum].c, 0.5*(1.-LEAKAGE));
+				  }while(newI[i].a + newI[i].b + newI[i].c == 0);
+				  
 				  // apply mutations from binomial draws with mean a*MU, b*MU
 				  if(MU > 0)
 				    {
