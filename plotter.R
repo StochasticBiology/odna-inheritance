@@ -324,7 +324,7 @@ g.models = list()
 npop = 100
 for(model in 1:2) {
   if(model == 1) { scale = "0.250"; penalty = "0.000" }
-  if(model == 2) { scale = "0.500"; penalty = "0.100" }
+  if(model == 2) { scale = "0.500"; penalty = "0.250" }
   
   # read in all parallelised outputs for a given scale/penalty combination
   df = data.frame()
@@ -361,6 +361,10 @@ for(model in 1:2) {
 
 
 ggarrange(plotlist = g.models)
+
+png("different-models.png", width=1200*sf, height=600*sf, res=72*sf)
+print(ggarrange(plotlist = g.models))
+dev.off()
 
 #### redundant from here on except for confirming that f = 1-mu when N = 1
 ######## baseline behaviour for single oDNA per cell
