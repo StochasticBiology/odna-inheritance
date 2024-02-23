@@ -40,13 +40,13 @@ gcc -o3 inherit.c -lm -o inherit.ce
 ./inherit.ce 100 6 0 0 > tmp &
 
 # heteroplasmy penalty
-./inherit.ce 100 0 0 1 > tmp &
-./inherit.ce 100 1 0 1 > tmp &
-./inherit.ce 100 2 0 1 > tmp &
-./inherit.ce 100 3 0 1 > tmp &
-./inherit.ce 100 4 0 1 > tmp &
-./inherit.ce 100 5 0 1 > tmp &
-./inherit.ce 100 6 0 1 > tmp &
+./inherit.ce 100 0 0.5 1 > tmp &
+./inherit.ce 100 1 0.5 1 > tmp &
+./inherit.ce 100 2 0.5 1 > tmp &
+./inherit.ce 100 3 0.5 1 > tmp &
+./inherit.ce 100 4 0.5 1 > tmp &
+./inherit.ce 100 5 0.5 1 > tmp &
+./inherit.ce 100 6 0.5 1 > tmp &
 
 # arguments to the baseline simulation code are
 # population size, DUI, fitness of less good allele, heteroplasmy penalty
