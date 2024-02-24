@@ -31,22 +31,22 @@ gcc -o3 inherit.c -lm -o inherit.ce
 ./inherit.ce 200 6 0.5 0 > tmp &
 
 # no fitness contribution from less good allele
-./inherit.ce 100 0 0 0 > tmp &
-./inherit.ce 100 1 0 0 > tmp &
-./inherit.ce 100 2 0 0 > tmp &
-./inherit.ce 100 3 0 0 > tmp &
-./inherit.ce 100 4 0 0 > tmp &
-./inherit.ce 100 5 0 0 > tmp &
-./inherit.ce 100 6 0 0 > tmp &
+./inherit.ce 100 0 0.25 0 > tmp &
+./inherit.ce 100 1 0.25 0 > tmp &
+./inherit.ce 100 2 0.25 0 > tmp &
+./inherit.ce 100 3 0.25 0 > tmp &
+./inherit.ce 100 4 0.25 0 > tmp &
+./inherit.ce 100 5 0.25 0 > tmp &
+./inherit.ce 100 6 0.25 0 > tmp &
 
 # heteroplasmy penalty
-./inherit.ce 100 0 0.5 1 > tmp &
-./inherit.ce 100 1 0.5 1 > tmp &
-./inherit.ce 100 2 0.5 1 > tmp &
-./inherit.ce 100 3 0.5 1 > tmp &
-./inherit.ce 100 4 0.5 1 > tmp &
-./inherit.ce 100 5 0.5 1 > tmp &
-./inherit.ce 100 6 0.5 1 > tmp &
+./inherit.ce 100 0 0.5 0.25 > tmp &
+./inherit.ce 100 1 0.5 0.25 > tmp &
+./inherit.ce 100 2 0.5 0.25 > tmp &
+./inherit.ce 100 3 0.5 0.25 > tmp &
+./inherit.ce 100 4 0.5 0.25 > tmp &
+./inherit.ce 100 5 0.5 0.25 > tmp &
+./inherit.ce 100 6 0.5 0.25 > tmp &
 
 # arguments to the baseline simulation code are
 # population size, DUI, fitness of less good allele, heteroplasmy penalty
@@ -110,4 +110,23 @@ gcc -o3 inherit-zoom.c -lm -o inherit-zoom.ce
 ./inherit-zoom.ce 200 0.5 0 > tmp &
 
 
+######
+
+gcc -o3 inherit-z2.c -lm -o inherit-z2.ce
+
+./inherit-z2.ce 0 0.5 0 > tmp &
+./inherit-z2.ce 1 0.5 0 > tmp &
+./inherit-z2.ce 2 0.5 0 > tmp &
+./inherit-z2.ce 3 0.5 0 > tmp &
+./inherit-z2.ce 4 0.5 0 > tmp &
+./inherit-z2.ce 5 0.5 0 > tmp &
+./inherit-z2.ce 6 0.5 0 > tmp &
+./inherit-z2.ce 7 0.5 0 > tmp &
+./inherit-z2.ce 8 0.5 0 > tmp &
+./inherit-z2.ce 9 0.5 0 > tmp &
+./inherit-z2.ce 10 0.5 0 > tmp &
+./inherit-z2.ce 20 0.5 0 > tmp &
+./inherit-z2.ce 50 0.5 0 > tmp &
+./inherit-z2.ce 100 0.5 0 > tmp &
+./inherit-z2.ce 200 0.5 0 > tmp &
 

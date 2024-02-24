@@ -58,14 +58,14 @@ for(npop in c(50, 100, 200)) {
   
   # empirical fit to fitness behaviour for constant environments
   fit.df = mean.df[mean.df$env == 0 & mean.df$meanmean/mean.df$nDNA != 1,]
-  fit.df$x = 1- fit.df$mu*(fit.df$nDNA**0.5)/(1-fit.df$leakage)
+  fit.df$x = 1- fit.df$mu*(fit.df$nDNA**0.5)/(1-fit.df$leakage)**2
   fit.df$y = fit.df$meanmean/fit.df$nDNA
   my.fit = summary(lm(y ~ x, data=fit.df))
   plot.title = paste0("Empirical fit for constant environments\nR^2 = ", round(my.fit$r.squared, digits=3))
   
   emp.fit.g = ggplot(fit.df, aes(x=x, y=y, color=factor(leakage))) + 
     geom_point() + #+ geom_line() 
-    labs(x="1 - mu*sqrt(nDNA)/(1 - lambda)", y="meanf", color="lambda") +
+    labs(x="1 - mu*sqrt(nDNA)/(1 - lambda)^2", y="meanf", color="lambda") +
     geom_abline() +
     ggtitle(plot.title)
   
@@ -442,3 +442,49 @@ to.fit = mean.df[mean.df$meanmean/mean.df$nDNA != 1,]
 to.fit$y = to.fit$meanmean/to.fit$nDNA
 to.fit$x = 1- to.fit$mu*to.fit$nDNA**0.5
 summary(lm(y ~ x, data=to.fit))
+
+
+
+######### Z2 experiment
+
+scale = "0.500"
+penalty = "0.000"
+df = data.frame()
+for(expt in c(0:10,20,50,100,200)) {
+  tdf = read.csv(paste0("inherit-z2-mean-out-", expt, "-", scale, "-", penalty, ".csv"))
+  df = rbind(df, tdf)
+}
+df = df[!is.na(df$expt),]
+
+df$period = as.numeric(df$env)
+
+long.df = df[df$DUI == 0 & df$t > 900,]
+
+mean.df = long.df[long.df$expt==0,]
+mean.df$meanmean = 0
+mean.df$meanvar = 0
+for(i in 1:nrow(mean.df)) {
+  mean.df$meanmean[i] = mean(long.df$mean.f[long.df$env == mean.df$env[i] &
+                                              long.df$nDNA == mean.df$nDNA[i] &
+                                              long.df$mu == mean.df$mu[i] &
+                                              long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
+  mean.df$meanvar[i] = mean(long.df$var.f[long.df$env == mean.df$env[i] &
+                                            long.df$nDNA == mean.df$nDNA[i] &
+                                            long.df$mu == mean.df$mu[i] &
+                                            long.df$leakage == mean.df$leakage[i]], na.rm= TRUE)
+}
+
+g.zoom = ggplot(mean.df, aes(x=leakage,y=nDNA,fill=meanmean/nDNA)) + 
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+  geom_tile() + facet_wrap(~ period)
+
+g.zoom
+
+sf = 2
+png(paste0("z2-region.png"), width=800*sf, height=600*sf, res=72*sf)
+print(g.zoom)
+dev.off()
+
