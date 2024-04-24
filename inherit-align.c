@@ -85,31 +85,33 @@ int main(int argc, char *argv[])
   int reporttime;
   double meanmean, meanmeanh, meannorm;
   double meanw, meanwnorm;
+  int ICs;
   
-  if(argc != 5) {
-    printf("Please specify Npop, environmental change period, fitness scale, and heteroplasmy penalty\n");
+  if(argc != 6) {
+    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, and heteroplasmy penalty\n");
     exit(0);
   }
   NPOP = atoi(argv[1]);
-  env = atoi(argv[2]);
-  scale = atof(argv[3]);
-  penalty = atof(argv[4]);
+  ICs = atoi(argv[2]);
+  env = atoi(argv[3]);
+  scale = atof(argv[4]);
+  penalty = atof(argv[5]);
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-belen-full-out-%i-%i-%.3f-%.3f.csv", NPOP, env, scale, penalty);
+  sprintf(fstr, "inherit-belen-full-out-%i-%i-%i-%.3f-%.3f.csv", NPOP, ICs, env, scale, penalty);
   fp = fopen(fstr, "w");
   fprintf(fp, "Npop,scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-belen-mean-out-%i-%i-%.3f-%.3f.csv", NPOP, env, scale, penalty);
+  sprintf(fstr, "inherit-belen-mean-out-%i-%i-%i-%.3f-%.3f.csv", NPOP, ICs, env, scale, penalty);
   fpm = fopen(fstr, "w");
   fprintf(fpm, "Npop,scale,penalty,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
 #endif
 
 #ifdef _CHANGEOUTPUT
-  sprintf(fstr, "inherit-belen-change-out-%i-%i-%.3f-%.3f.csv", NPOP, env, scale, penalty);
+  sprintf(fstr, "inherit-belen-change-out-%i-%i-%i-%.3f-%.3f.csv", NPOP, ICs, env, scale, penalty);
   fpc = fopen(fstr, "w");
   fprintf(fpc, "Npop,scale,penalty,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
 #endif
@@ -135,9 +137,17 @@ int main(int argc, char *argv[])
 		      // initialise population. every even-index individual has NDNA a; every odd-index individual has NDNA b
 		      // we picture the first half of the population as female and the second half as male
 		      for(i = 0; i < NPOP; i++)
-			//{ I[i].a = (i%2 == 0 ? NDNA : 0); I[i].b = NDNA-I[i].a; I[i].c = 0; }
-			{ I[i].a = NDNA/2.; I[i].b = NDNA/2.; I[i].c = 0; }
-
+			{
+			  if(ICs == 0)
+			    {
+			      I[i].a = NDNA/2.; I[i].b = NDNA/2.; I[i].c = 0;
+			    }
+			  else
+			    {
+			      I[i].a = (i%2 == 0 ? NDNA : 0); I[i].b = NDNA-I[i].a; I[i].c = 0;
+			    }
+			}
+			
 		      printf("%i %i %f %i %f %i\n", env, NDNA, MU, DUI, LEAKAGE, expt);
 
 		      meanmean = meannorm = meanmeanh = 0;
@@ -180,7 +190,7 @@ int main(int argc, char *argv[])
 			  varf /= (NPOP-1);
 #ifdef _MEANOUTPUT
 			  if(expt < 4)
-			    fprintf(fpm, "%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, scale, penalty, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf, meanh);
+			    fprintf(fpm, "%i,%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale, penalty, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf, meanh);
 #endif
 
 			  // sample mean fitness after adaptive final section
@@ -201,7 +211,7 @@ int main(int argc, char *argv[])
 			    {
 			      if(t == 10 || t == 100 || t == 500 || t == 900)
 				{
-				  fprintf(fp, "%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, scale,penalty,env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
+				  fprintf(fp, "%i,%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty,env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
 				}
 			    }
 #endif
@@ -270,7 +280,7 @@ int main(int argc, char *argv[])
 			    }
 			}
 #ifdef _CHANGEOUTPUT
-		      fprintf(fpc, "%i,%f,%f,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, scale,penalty,env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
+		      fprintf(fpc, "%i,%i,%f,%f,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
 #endif
 		    
 		    }
