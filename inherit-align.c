@@ -121,16 +121,16 @@ int main(int argc, char *argv[])
   //  for(env = 0; env <= 6; env++)
   {
     // loop over DNA population size
-    for(NDNA = 10; NDNA <= 1000; NDNA *= 5)
+    for(NDNA = 10; NDNA <= 1000; NDNA *= 2)
       {
 	// loop over different mutation rates
-	for(MU = 0; MU <= 0.011; MU += 0.0025)
+	for(MU = 0; MU <= 1e-3; MU *= 10)
 	  {
 	    // loop over doubly-uniparental inheritance
 	    for(DUI = 0; DUI <= 1; DUI++)
 	      {
 		// loop over paternal leakage
-		for(LEAKAGE = 0; LEAKAGE <= 0.51; LEAKAGE *= 10)
+		for(LEAKAGE = 0; LEAKAGE <= 0.51; LEAKAGE *= 2)
 		  {
 		    // loop over instances for each parameterisation
 		    for(expt = 0; expt < NSAMP; expt++)
@@ -291,6 +291,7 @@ int main(int argc, char *argv[])
 		    if(LEAKAGE == 0) LEAKAGE = 5e-4;
 		  }
 	      }
+	    if(MU == 0) MU = 1e-7;
 	  }
       }
   }
