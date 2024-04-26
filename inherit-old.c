@@ -85,10 +85,10 @@ int main(int argc, char *argv[])
   int reporttime;
   double meanmean, meanmeanh, meannorm;
   double meanw, meanwnorm;
-  int ICs, DETERMINISTIC;
+  int ICs, DET_REAMP, DET_LEAK;
   
-  if(argc != 7) {
-    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp\n");
+  if(argc != 8) {
+    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp, deterministic leakage\n");
     exit(0);
   }
   NPOP = atoi(argv[1]);
@@ -96,25 +96,26 @@ int main(int argc, char *argv[])
   env = atoi(argv[3]);
   scale = atof(argv[4]);
   penalty = atof(argv[5]);
-  DETERMINISTIC = atoi(argv[6]);
+  DET_REAMP = atoi(argv[6]);
+  DET_LEAK = atoi(argv[7]);
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-belen-old-full-out-%i-%i-%i-%.3f-%.3f-%i.csv", NPOP, ICs, env, scale, penalty, DETERMINISTIC);
+  sprintf(fstr, "inherit-belen-old-full-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
   fp = fopen(fstr, "w");
-  fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
+  fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-belen-old-mean-out-%i-%i-%i-%.3f-%.3f-%i.csv", NPOP, ICs, env, scale, penalty, DETERMINISTIC);
+  sprintf(fstr, "inherit-belen-old-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
   fpm = fopen(fstr, "w");
-  fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
+  fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
 #endif
 
 #ifdef _CHANGEOUTPUT
-  sprintf(fstr, "inherit-belen-old-change-out-%i-%i-%i-%.3f-%.3f-%i.csv", NPOP, ICs, env, scale, penalty, DETERMINISTIC);
+  sprintf(fstr, "inherit-belen-old-change-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
   fpc = fopen(fstr, "w");
-  fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
+  fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
 #endif
 
   // loop over different environment types
@@ -191,7 +192,7 @@ int main(int argc, char *argv[])
 			    varf /= (NPOP-1);
 #ifdef _MEANOUTPUT
 			    if(expt < 4)
-			      fprintf(fpm, "%i,%i,%f,%f,%i,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale, penalty, DETERMINISTIC, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf, meanh);
+			      fprintf(fpm, "%i,%i,%f,%f,%i,%i,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale, penalty, DET_REAMP, DET_LEAK, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf, meanh);
 #endif
 
 			    // sample mean fitness after adaptive final section
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
 			      {
 				if(t == 10 || t == 100 || t == 500 || t == 900)
 				  {
-				    fprintf(fp, "%i,%i,%f,%f,%i,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty, DETERMINISTIC, env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
+				    fprintf(fp, "%i,%i,%f,%f,%i,%i,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty, DET_REAMP, DET_LEAK, env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
 				  }
 			      }
 #endif
@@ -238,10 +239,16 @@ int main(int argc, char *argv[])
 				  }
 
 				// construct new individual's genetic makeup from binomial draws with mean (1-leak)*mother + leak*father
-				do{ 
-				  newI[i].a = binomial(I[dad].a, LEAKAGE*0.5) + binomial(I[mum].a, (1.-LEAKAGE)*0.5);
-				  newI[i].b = binomial(I[dad].b, LEAKAGE*0.5) + binomial(I[mum].b, (1.-LEAKAGE)*0.5);
-				  newI[i].c = binomial(I[dad].c, LEAKAGE*0.5) + binomial(I[mum].c, (1.-LEAKAGE)*0.5);
+				do{
+				  if(DET_LEAK) {
+				    newI[i].a = round(LEAKAGE*binomial(I[dad].a, 0.5) + (1.-LEAKAGE)*binomial(I[mum].a, 0.5));
+				    newI[i].b = round(LEAKAGE*binomial(I[dad].b, 0.5) + (1.-LEAKAGE)*binomial(I[mum].b, 0.5));
+				    newI[i].c = round(LEAKAGE*binomial(I[dad].c, 0.5) + (1.-LEAKAGE)*binomial(I[mum].c, 0.5));
+				  } else {
+				    newI[i].a = binomial(I[dad].a, LEAKAGE*0.5) + binomial(I[mum].a, (1.-LEAKAGE)*0.5);
+				    newI[i].b = binomial(I[dad].b, LEAKAGE*0.5) + binomial(I[mum].b, (1.-LEAKAGE)*0.5);
+				    newI[i].c = binomial(I[dad].c, LEAKAGE*0.5) + binomial(I[mum].c, (1.-LEAKAGE)*0.5);
+				  }
 				}while(newI[i].a + newI[i].b + newI[i].c == 0);
 				
 				// apply mutations from binomial draws with mean a*MU, b*MU
@@ -254,8 +261,9 @@ int main(int argc, char *argv[])
 				  }
 
 				// deterministic reamplification
-				if(DETERMINISTIC)
+				if(DET_REAMP)
 				  {
+				    newI[i].a *= 2; newI[i].b *= 2; newI[i].c *= 2;
 				    int newsum = newI[i].a+newI[i].b+newI[i].c;
 				    newI[i].a = round((double)newI[i].a*NDNA/newsum);
 				    newI[i].b = round((double)newI[i].b*NDNA/newsum);
@@ -284,7 +292,7 @@ int main(int argc, char *argv[])
 			      }
 			  }
 #ifdef _CHANGEOUTPUT
-			fprintf(fpc, "%i,%i,%f,%f,%i,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DETERMINISTIC, env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
+			fprintf(fpc, "%i,%i,%f,%f,%i,%i,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
 #endif
 		    
 		      }
