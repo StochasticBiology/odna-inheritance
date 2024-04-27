@@ -5,6 +5,25 @@ gcc -o3 inherit-align.c -lm -o inherit-align.ce
 # arguments: [organismal population size] [homoplasmic ICs] [env change period] [fitness of bad allele] [heteroplasmy penalty] [deterministic reamplification] [deterministic leakage]
 # output files are labelled by these arguments (and "old" in the case of inherit-old)
 
+# compare the various degrees of freedom
+./inherit-old.ce 100 0 0 0.5 0 0 0 >tmp &
+./inherit-old.ce 100 0 0 0.5 0 0 1 >tmp &
+./inherit-old.ce 100 0 0 0.5 0 1 0 >tmp &
+./inherit-old.ce 100 0 0 0.5 0 1 1 >tmp &
+./inherit-old.ce 100 1 0 0.5 0 0 0 >tmp &
+./inherit-old.ce 100 1 0 0.5 0 0 1 >tmp &
+./inherit-old.ce 100 1 0 0.5 0 1 0 >tmp &
+./inherit-old.ce 100 1 0 0.5 0 1 1 >tmp &
+
+./inherit-old.ce 100 0 10 0.5 0 0 0 >tmp &
+./inherit-old.ce 100 0 10 0.5 0 0 1 >tmp &
+./inherit-old.ce 100 0 10 0.5 0 1 0 >tmp &
+./inherit-old.ce 100 0 10 0.5 0 1 1 >tmp &
+./inherit-old.ce 100 1 10 0.5 0 0 0 >tmp &
+./inherit-old.ce 100 1 10 0.5 0 0 1 >tmp &
+./inherit-old.ce 100 1 10 0.5 0 1 0 >tmp &
+./inherit-old.ce 100 1 10 0.5 0 1 1 >tmp &
+
 # align with BGP version (heteroplasmic ICs, deterministic leakage, deterministic reamplification)
 ./inherit-old.ce 100 0 0 0.5 0 1 1 >tmp &
 ./inherit-old.ce 100 0 5 0.5 0 1 1 >tmp &
