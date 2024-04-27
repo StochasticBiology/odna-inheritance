@@ -5,5 +5,5 @@ Currently (Apr 26th) the repo structure is a bit complicated. `inherit-old.c` ta
 
 Some observations from cross-model comparison
  * deterministic leakage (as opposed to stochastic) has a substantial disadvantage to higher leakage values (not sure why?)
- * heteroplasmic initial conditions (as opposed to homoplasmic) preserve heterozygosity much longer and mean the environmental change period is longer
+ * heteroplasmic initial conditions (as opposed to homoplasmic) preserve heterozygosity much longer and mean the environmental change period supported is longer (or equivalently, performance is better for a given environmental change period)
  * deterministic reamplification (as opposed to stochastic) seems to have a smaller effect
