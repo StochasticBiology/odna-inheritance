@@ -2,33 +2,55 @@ library(reshape2)
 library(ggplot2)
 library(dplyr)
 
-# older version, coarser steps, deterministic reamplication
-# this looks consistent with current picture but not "stepping stone"?
-# could be deterministic vs stochastic leakage -- now testing
+# explore effects of different model protocols 
+
 mdf = data.frame()
-for(env in c(0, 1:10, 15, 20)) {
-  tdf = read.csv(paste0("inherit-belen-old-change-out-100-1-", env, "-0.500-0.000-1-1.csv"))
-  mdf = rbind(mdf, tdf)
+for(env in c(0, 10)) {
+  for(ics in c(0,1)) {
+    for(leak in c(0,1)) {
+      for(reamp in c(0,1)) {
+        tdf = read.csv(paste0("inherit-belen-old-change-out-100-", ics, "-", env, "-0.500-0.000-", leak, "-", reamp, ".csv"))
+        mdf = rbind(mdf, tdf)
+      }
+    }
+  }
 }
 
 means.df = mdf %>% 
-  group_by(leakage, DUI, nDNA, mu, env) %>%
+  group_by(leakage, DUI, nDNA, mu, env, ICs, det.leak, det.reamp) %>%
   summarize(mean_f = mean(end.mean.f/nDNA))
 
-ggarrange(
-  ggplot(means.df[means.df$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
- #   scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu),
-  ggplot(means.df[means.df$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-#    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu)
-)
+expt.label = function(ICs, det.leak, det.reamp) {
+  ics = c("hetero", "homo")[ICs]
+  leak = c("s.leak", "d.leak")[det.leak]
+  reamp = c("s.ramp", "d.ramp")[det.reamp]
+  return(paste0(ics,leak,reamp, collapse=","))
+}
+
+means.df$label = 100*means.df$ICs+10*means.df$det.leak+means.df$det.reamp
+
+sub = means.df[means.df$DUI==0 & means.df$env==0 & means.df$mu ==0, ]
+g.env.0 = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+#  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
+    facet_wrap(~label)
+
+
+sub = means.df[means.df$DUI==0 & means.df$env==10 & means.df$mu ==0, ]
+g.env.10 = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  #  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
+  facet_wrap(~label)
+
+ggarrange(g.env.0, g.env.10, nrow=1)
+# leading observations: 
+# deterministic leakage model means high leakage always challenges adaptation (worse values with tens)
+# heteroplasmic ICs maintain heterozygosity over longer time period (better values without hundreds for env = 10)
+
 
 #### finer steps through parameter space
 
@@ -71,7 +93,7 @@ cor(sub$mean_f, 1-sub$mu*sqrt(sub$nDNA)/(1-sub$leakage)**2, use="complete.obs" )
 
 
 
-/##### comparison of BGP and aligned dynamics -- for debugging
+##### comparison of BGP and aligned dynamics -- for debugging
 
 # read a particular BGP example
 
