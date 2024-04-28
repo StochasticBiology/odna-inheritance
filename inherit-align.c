@@ -7,7 +7,7 @@
 #define NGEN 500        // number of generations in simulation
 #define NSAMP 100        // number of samples to run
 
-#define _MEANOUTPUT
+//#define _MEANOUTPUT
 #define _CHANGEOUTPUT
 
 // structure to store an individual's genetic makeup -- number of genomes of type a, b, c
@@ -101,19 +101,19 @@ int main(int argc, char *argv[])
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-belen-old-full-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
+  sprintf(fstr, "inherit-belen-full-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
   fp = fopen(fstr, "w");
   fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-belen-old-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
+  sprintf(fstr, "inherit-belen-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
   fpm = fopen(fstr, "w");
   fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
 #endif
 
 #ifdef _CHANGEOUTPUT
-  sprintf(fstr, "inherit-belen-old-change-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
+  sprintf(fstr, "inherit-belen-change-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
   fpc = fopen(fstr, "w");
   fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
 #endif
