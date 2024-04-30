@@ -153,7 +153,7 @@ for N in Ns:
                 for o in outputs:
                     my_csv = o+'_env_'+str(E)+'_lambda_'+str(lam)+'_mu_'+str(mut)+'_N_'+str(N)+'_seed_666.csv'
                     df_seed666=pd.read_csv(my_csv, index_col=0)
-                    my_csv = o+'_env_'+str(E)+'_lambda_'+str(lam)+'_mu_'+str(mut)+'_N_'+str(N)+'_seed_500c.csv'
+                    my_csv = o+'_env_'+str(E)+'_lambda_'+str(lam)+'_mu_'+str(mut)+'_N_'+str(N)+'_seed_500.csv'
                     df_seed500=pd.read_csv(my_csv, index_col=0)
                     my_csv = o+'_env_'+str(E)+'_lambda_'+str(lam)+'_mu_'+str(mut)+'_N_'+str(N)+'_seed_200.csv'
                     df_seed200=pd.read_csv(my_csv, index_col=0)
