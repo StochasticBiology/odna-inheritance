@@ -1,6 +1,7 @@
 library(reshape2)
 library(ggplot2)
 library(dplyr)
+library(metR)
 
 # explore effects of different model protocols 
 
@@ -193,7 +194,11 @@ ggarrange(g.100, g.50, g.200, g.hetpen, ncol=2, nrow=2,
           labels =c("A. 100", "B. 50", "C. 200", "D. 100 hetpen"))
 dev.off()
 
-# empirical fit
+##### empirical fitting
+
+means.df = means.df.100
+
+# empirical fit in constant environments
 sub = means.df[means.df$DUI == 0 & means.df$env == 0 & means.df$leakage == 0,]
 ggplot(sub, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage))) + 
   geom_point() + geom_abline()
@@ -238,12 +243,43 @@ g.lambda.good = ggplot(bests, aes(x=mu, y=env, fill=goodlambda)) + geom_tile() +
 ggarrange(g.n, g.lambda,
           g.n.good, g.lambda.good)
 
+# LOESS fits to smooth contour plots
+mod.n = loess(goodn ~ mu + env, data = bests)
+to.plot.n = bests
+to.plot.n$goodn = predict(mod.n, newdata = to.plot, se = FALSE)
+mod.lambda = loess(goodlambda ~ mu + env, data = bests)
+to.plot.lambda = bests
+to.plot.lambda$goodlambda = predict(mod.lambda, newdata = to.plot, se = FALSE)
+
+# simulation data and smoother contours
+g.smooth.n = ggplot() +
+  geom_tile(data=bests, aes(x=mu, y=env, fill=goodn)) +
+  geom_contour(data=to.plot.n, aes(x=mu, y=env, z=goodn), 
+                    breaks=c((1:10)*20), color="white", alpha=0.5) +
+  geom_text_contour(data=to.plot.n, aes(x=mu, y=env, z=goodn), 
+                    breaks=c((1:10)*20), color="white", skip=0, min.size = 0, alpha=0.5) +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+g.smooth.lambda = ggplot() +
+  geom_tile(data=bests, aes(x=mu, y=env, fill=goodlambda)) +
+  geom_contour(data=to.plot.lambda, aes(x=mu, y=env, z=goodlambda), 
+               breaks=c((0:5)*0.1), color="white", alpha=0.5) +
+  geom_text_contour(data=to.plot.lambda, aes(x=mu, y=env, z=goodlambda), 
+               breaks=c((0:5)*0.1), color="white", skip=0, min.size = 0, alpha=0.5) +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+ggarrange(g.smooth.n, g.smooth.lambda)
+
 my.lm.n = lm(bestn ~ log(mu+1e-6)+log(env+1), data=bests)
 my.lm.lambda = lm(bestlambda ~ log(mu+1e-6)+log(env+1), data=bests)
 summary(my.lm.n)
 summary(my.lm.lambda)
 
-##### comparison of BGP and aligned dynamics -- for debugging
+##### comparison of BGP and aligned dynamics -- for debugging only
 
 # read a particular BGP example, produced by Inherit_comparison.py
 
