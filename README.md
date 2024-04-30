@@ -3,6 +3,10 @@ Different models for oDNA inheritance
 
 Currently (Apr 26th) the repo structure is a bit complicated. `inherit-old.c` takes coarse-grained steps through param space; `inherit-align.c` takes finer steps. The two should otherwise be identical. This is to help rapid investigation of different model structures (old) and in-depth investigation of a chosen protocol (align). 
 
+`Inheritance_algorithm.py` is Python code for the same type of simulation, but works rather more slowly. `Inherit_comparison.py` is this code looking at a subset of parameter space, for comparison with the C code. 
+
+`plot-align.R` plots everything; `run-align.sh` is a Bash script running the C simulations.
+
 Some observations from cross-model comparison
  * deterministic leakage (as opposed to stochastic) has a substantial disadvantage to higher leakage values (heterozygosity enforced, rather than a spread of possible values)
  * heteroplasmic initial conditions (as opposed to homoplasmic) preserve heterozygosity much longer and mean the environmental change period supported is longer (or equivalently, performance is better for a given environmental change period)
