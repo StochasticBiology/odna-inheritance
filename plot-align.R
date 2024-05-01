@@ -35,8 +35,8 @@ g.env.0 = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
   scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-#  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
-    facet_wrap(~label)
+  #  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
+  facet_wrap(~label)
 sub = means.df[means.df$DUI==1 & means.df$env==0 & means.df$mu ==0, ]
 g.env.0.dui = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
@@ -68,7 +68,7 @@ ggarrange(g.env.0, g.env.10,
 # leading observations: 
 # deterministic leakage model means high leakage always challenges adaptation (worse values with tens)
 # heteroplasmic ICs maintain heterozygosity over longer time period (better values without hundreds for env = 10)
-  
+
 ggplot(means.df[means.df$env==10,]) +
   geom_point(aes(x=leakage*(1+0.1*DUI), y=mean_f, color=DUI, fill=nDNA)) +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
@@ -118,18 +118,18 @@ means.df.50 = mdf %>%
 
 
 g.50 = ggarrange(
-ggplot(means.df.50[means.df.50$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-  facet_grid(env ~ mu),
-ggplot(means.df.50[means.df.50$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-  facet_grid(env ~ mu)
+  ggplot(means.df.50[means.df.50$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    facet_grid(env ~ mu),
+  ggplot(means.df.50[means.df.50$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    facet_grid(env ~ mu)
 )
 
 ## larger population size
@@ -204,80 +204,93 @@ ggplot(sub, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage
   geom_point() + geom_abline()
 
 sub = means.df[means.df$DUI == 0 & means.df$env == 0,]
-ggplot(sub, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(nDNA))) + 
+ggplot(sub, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage))) + 
   geom_point() + geom_abline()
 cor(sub$mean_f, 1-sub$mu*sqrt(sub$nDNA)/(1-sub$leakage)**2, use="complete.obs" )**2
 
+# remove the highest-leakage case, which is an outlier to this empirical fit
+sub2 = sub[sub$leakage < 0.5,]
+ggplot(sub2, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage))) + 
+  geom_point() + geom_abline()
+
+png("plot-align-empirical.png", width=400*sf, height=400*sf, res=72*sf)
+ggplot(sub2, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage))) + 
+  geom_point() + geom_abline()
+dev.off()
+cor(sub2$mean_f, 1-sub2$mu*sqrt(sub2$nDNA)/(1-sub2$leakage)**2, use="complete.obs" )**2
+
 ### empirical where is best?
-sub = means.df[means.df$DUI == 0 & !is.na(means.df$mean_f),]
-bests = data.frame()
-for(this.mu in unique(sub$mu)) {
-  for(this.env in unique(sub$env)) {
-    subsub = sub[sub$mu==this.mu & sub$env==this.env,]
-    bestfitness = subsub[which(subsub$mean_f==max(subsub$mean_f)),]
-    goodfitness = subsub[which(subsub$mean_f>=0.99*max(subsub$mean_f)),]
-    bests = rbind(bests, data.frame(mu=this.mu, env=this.env, 
-                                    bestn = mean(bestfitness$nDNA), bestlambda=mean(bestfitness$leakage),
-                                    goodn = mean(goodfitness$nDNA), goodlambda=mean(goodfitness$leakage)))
+for(expt in c("normal", "hetpen")) {
+  if(expt == "normal") { means.df = means.df.100 }
+  if(expt == "hetpen") { means.df = means.df.hetpen }
+  
+  sub = means.df[means.df$DUI == 0 & !is.na(means.df$mean_f),]
+  bests = data.frame()
+  for(this.mu in unique(sub$mu)) {
+    for(this.env in unique(sub$env)) {
+      subsub = sub[sub$mu==this.mu & sub$env==this.env,]
+      bestfitness = subsub[which(subsub$mean_f==max(subsub$mean_f)),]
+      goodfitness = subsub[which(subsub$mean_f>=0.99*max(subsub$mean_f)),]
+      bests = rbind(bests, data.frame(mu=this.mu, env=this.env, 
+                                      bestn = mean(bestfitness$nDNA), bestlambda=mean(bestfitness$leakage),
+                                      goodn = mean(goodfitness$nDNA), goodlambda=mean(goodfitness$leakage)))
+    }
   }
+  bests$env[bests$env==0] = 1
+  bests$mu[bests$mu==0] = 1e-7
+  g.n = ggplot(bests, aes(x=mu, y=env, fill=bestn)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  g.lambda = ggplot(bests, aes(x=mu, y=env, fill=bestlambda)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  g.n.good = ggplot(bests, aes(x=mu, y=env, fill=goodn)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  g.lambda.good = ggplot(bests, aes(x=mu, y=env, fill=goodlambda)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  
+  ggarrange(g.n, g.lambda,
+            g.n.good, g.lambda.good)
+  
+  # LOESS fits to smooth contour plots
+  mod.n = loess(goodn ~ mu + env, data = bests)
+  to.plot.n = bests
+  to.plot.n$goodn = predict(mod.n, newdata = to.plot, se = FALSE)
+  mod.lambda = loess(goodlambda ~ mu + env, data = bests)
+  to.plot.lambda = bests
+  to.plot.lambda$goodlambda = predict(mod.lambda, newdata = to.plot, se = FALSE)
+  
+  # simulation data and smoother contours
+  g.smooth.n = ggplot() +
+    geom_tile(data=bests, aes(x=mu, y=env, fill=goodn)) +
+    geom_contour(data=to.plot.n, aes(x=mu, y=env, z=goodn), 
+                 breaks=c((1:10)*20), color="white", alpha=0.5) +
+    geom_text_contour(data=to.plot.n, aes(x=mu, y=env, z=goodn), 
+                      breaks=c((1:10)*20), color="white", skip=0, min.size = 0, alpha=0.5) +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  
+  g.smooth.lambda = ggplot() +
+    geom_tile(data=bests, aes(x=mu, y=env, fill=goodlambda)) +
+    geom_contour(data=to.plot.lambda, aes(x=mu, y=env, z=goodlambda), 
+                 breaks=c((0:5)*0.1), color="white", alpha=0.5) +
+    geom_text_contour(data=to.plot.lambda, aes(x=mu, y=env, z=goodlambda), 
+                      breaks=c((0:5)*0.1), color="white", skip=0, min.size = 0, alpha=0.5) +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  
+  png(paste0("plot-align-optim-", expt, ".png", collapse=""), width=600*sf, height=300*sf, res=72*sf)
+  print(ggarrange(g.smooth.n, g.smooth.lambda))
+  dev.off()
 }
-bests$env[bests$env==0] = 1
-bests$mu[bests$mu==0] = 1e-7
-g.n = ggplot(bests, aes(x=mu, y=env, fill=bestn)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-g.lambda = ggplot(bests, aes(x=mu, y=env, fill=bestlambda)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-g.n.good = ggplot(bests, aes(x=mu, y=env, fill=goodn)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-g.lambda.good = ggplot(bests, aes(x=mu, y=env, fill=goodlambda)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-
-ggarrange(g.n, g.lambda,
-          g.n.good, g.lambda.good)
-
-# LOESS fits to smooth contour plots
-mod.n = loess(goodn ~ mu + env, data = bests)
-to.plot.n = bests
-to.plot.n$goodn = predict(mod.n, newdata = to.plot, se = FALSE)
-mod.lambda = loess(goodlambda ~ mu + env, data = bests)
-to.plot.lambda = bests
-to.plot.lambda$goodlambda = predict(mod.lambda, newdata = to.plot, se = FALSE)
-
-# simulation data and smoother contours
-g.smooth.n = ggplot() +
-  geom_tile(data=bests, aes(x=mu, y=env, fill=goodn)) +
-  geom_contour(data=to.plot.n, aes(x=mu, y=env, z=goodn), 
-                    breaks=c((1:10)*20), color="white", alpha=0.5) +
-  geom_text_contour(data=to.plot.n, aes(x=mu, y=env, z=goodn), 
-                    breaks=c((1:10)*20), color="white", skip=0, min.size = 0, alpha=0.5) +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-
-g.smooth.lambda = ggplot() +
-  geom_tile(data=bests, aes(x=mu, y=env, fill=goodlambda)) +
-  geom_contour(data=to.plot.lambda, aes(x=mu, y=env, z=goodlambda), 
-               breaks=c((0:5)*0.1), color="white", alpha=0.5) +
-  geom_text_contour(data=to.plot.lambda, aes(x=mu, y=env, z=goodlambda), 
-               breaks=c((0:5)*0.1), color="white", skip=0, min.size = 0, alpha=0.5) +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-
-ggarrange(g.smooth.n, g.smooth.lambda)
-
-my.lm.n = lm(bestn ~ log(mu+1e-6)+log(env+1), data=bests)
-my.lm.lambda = lm(bestlambda ~ log(mu+1e-6)+log(env+1), data=bests)
-summary(my.lm.n)
-summary(my.lm.lambda)
 
 ##### comparison of BGP and aligned dynamics -- for debugging only
 
@@ -288,8 +301,8 @@ env = 8; mu = 0.01;
 for(seed in c(0, 1, 2, 3, 4, 5, 6, 200, 500, 666)) {
   for(Ns in c(10*2**(0:5))) {
     for(lambda in c(0,"0.0005",0.001,0.002,0.004,0.008,0.016,0.032,0.064,0.13,0.26,0.51)) {
-  tdf = read.csv(paste0("f_env_", env, "_lambda_", lambda, "_mu_", mu, "_N_", Ns, "_seed_", seed, ".csv"))
- dft = rbind(dft, data.frame(meanf=mean(tdf[-1,499]),lambda=lambda,Ns=Ns,seed=seed))
+      tdf = read.csv(paste0("f_env_", env, "_lambda_", lambda, "_mu_", mu, "_N_", Ns, "_seed_", seed, ".csv"))
+      dft = rbind(dft, data.frame(meanf=mean(tdf[-1,499]),lambda=lambda,Ns=Ns,seed=seed))
     }
   }
 }
@@ -310,7 +323,7 @@ g.bgp = ggplot(means.df, aes(x=lambda, y=Ns, fill=mean_f)) + geom_tile() +
   scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) 
-  
+
 ggarrange(g.igj, g.bgp, labels=c("IGJ", "BGP"))
 
 
