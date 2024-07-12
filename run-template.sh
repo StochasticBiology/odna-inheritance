@@ -1,5 +1,9 @@
 gcc -o3 inherit-old.c -lm -o inherit-old.ce
 gcc -o3 inherit-template.c -lm -o inherit-template.ce
+gcc -o3 inherit-template-ts.c -lm -o inherit-template-ts.ce
+
+./inherit-template-ts.ce 100 1 0 0.5 0 0 0 0 > tmp &
+./inherit-template-ts.ce 100 1 16 0.5 0 0 0 0 > tmp &
 
 # inherit-old takes coarser steps through parameter space; inherit-template finer
 # arguments: [organismal population size] [homoplasmic ICs] [env change period] [fitness of bad allele] [heteroplasmy penalty] [deterministic reamplification] [deterministic leakage] [template repair rate]
