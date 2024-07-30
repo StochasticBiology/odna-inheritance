@@ -4,6 +4,58 @@ library(dplyr)
 library(metR)
 library(ggpubr)
 
+# time series demonstrations
+
+df1 = read.csv("inherit-template-full-out-10-1-0-0.500-0.000-0-0-0.00000.csv")
+expt.1 = df1[df1$t < 50,]
+
+df2 = read.csv("inherit-template-full-out-10-1-8-0.500-0.000-0-0-0.00000.csv")
+expt.2 = df2[df2$t < 50,]
+
+# function producting a plot summarising dynamics for a given subset of observations
+dyn.sum.plot = function(plot.set, tau, tstr) {
+   means.1 <- plot.set %>%
+    group_by(across(Npop:t)) %>%  # Group by columns a through h
+    summarize(mean_a = mean(a, na.rm = TRUE), 
+              mean_b = mean(b, na.rm = TRUE), 
+              mean_c = mean(c, na.rm = TRUE),
+              mean_f = mean(f, na.rm = TRUE),
+              .groups = 'drop')
+  
+ return( ggplot() +
+           geom_rect(data=data.frame(xmin=0,ymin=0,xmax=tau,ymax=50), 
+                     aes(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax), fill="#8888FF", alpha=0.4) +
+           geom_rect(data=data.frame(xmin=tau,ymin=0,xmax=35,ymax=50), 
+                     aes(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax), fill="#FF8888", alpha=0.4) +
+    geom_line(data=means.1, aes(x=t, y=mean_a), color="blue", linewidth=2) +
+    geom_line(data=means.1, aes(x=t, y=mean_b), color="red", linewidth=2) +
+    geom_line(data=means.1, aes(x=t, y=mean_c), color="grey", linewidth=2) +
+     
+    geom_point(data=plot.set, aes(x=t, y=a), color="blue", size=2, alpha=0.5) +
+    geom_point(data=plot.set, aes(x=t+0.3, y=b), color="red", size=2, alpha=0.5) +
+    geom_point(data=plot.set, aes(x=t+0.6, y=c), color="grey", size=2, alpha=0.5) +
+      geom_line(data=means.1, aes(x=t, y=mean_f), color="black", linewidth=2) +
+      labs(x="t", y="Counts and fitness") +
+      xlim(0,35) +
+      ggtitle(tstr) +
+    theme_light()
+ )
+  
+}
+
+
+# output a given set of example trajectories
+sf =2
+png("ex-time-series.png", width=600*sf, height=400*sf, res=72*sf)
+ggarrange(
+  dyn.sum.plot(expt.1[expt.1$mu==0 & expt.1$leakage==0.0,], 0, "μ=0, λ=0, τ=1"),
+  dyn.sum.plot(expt.1[expt.1$mu==2e-4 & expt.1$leakage==0.25,], 0, "μ=2e-4, λ=0.25, τ=1"),
+  dyn.sum.plot(expt.2[expt.2$mu==0 & expt.1$leakage==0.,], 8, "μ=0, λ=0, τ=8"),
+  dyn.sum.plot(expt.2[expt.2$mu==2e-4 & expt.1$leakage==0.25,], 8, "μ=2e-4, λ=0.25, τ=8"),
+  labels = c("B", "C", "D", "E" )
+)
+dev.off()
+
 # explore effects of different model protocols 
 
 mdf = data.frame()
@@ -29,13 +81,24 @@ expt.label = function(ICs, det.leak, det.reamp) {
   return(paste0(ics,leak,reamp, collapse=","))
 }
 
+label.fn = function(dfrow) {
+  if(dfrow["ICs"] == 1) { s1 = "pIC"} else { s1 = "hIC"}
+  if(dfrow["det.leak"] == 1) { s2 = "dL" } else { s2 = "rL"}
+  if(dfrow["det.reamp"] == 1) { s3 = "dR" } else { s3 = "rR" }
+  if(dfrow["ICs"] == 1 & dfrow["det.leak"] == 0 & dfrow["det.reamp"] == 0) { s4 = "*"} else {s4 = ""}
+  return(paste0(c(s1,s2,s3,s4),collapse=" "))
+}
+
 means.df$label = 100*means.df$ICs+10*means.df$det.leak+means.df$det.reamp
+means.df$label = apply(means.df, 1, function(dfrow) label.fn(dfrow))
 
 sub = means.df[means.df$DUI==0 & means.df$env==0 & means.df$mu ==0, ]
 g.env.0 = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
   scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+  labs(x = "Leakage", y="nDNA", fill = "Mean\nfitness") +
   #  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
   facet_wrap(~label)
 sub = means.df[means.df$DUI==1 & means.df$env==0 & means.df$mu ==0, ]
@@ -43,6 +106,8 @@ g.env.0.dui = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
   scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Leakage", y="nDNA", fill = "Mean\nfitness") +
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
   #  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
   facet_wrap(~label)
 
@@ -52,6 +117,8 @@ g.env.10 = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
   scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Leakage", y="nDNA", fill = "Mean\nfitness") +
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
   #  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
   facet_wrap(~label)
 sub = means.df[means.df$DUI==1 & means.df$env==10 & means.df$mu ==0, ]
@@ -59,13 +126,20 @@ g.env.10.dui = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
   scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
   scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Leakage", y="nDNA", fill = "Mean\nfitness") +
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
   #  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
   facet_wrap(~label)
 
+sf = 2
+png("si-different-models.png", width=600*sf, height=600*sf, res=72*sf)
 ggarrange(g.env.0, g.env.10, 
           g.env.0.dui, g.env.10.dui,
           nrow=2, ncol=2, 
-          labels = c("A. env=0, DUI=0", "B. env=10, DUI=0", "C. env=0, DUI=1", "D. env=10, DUI=1"))
+          #labels = c("A. env=0, DUI=0", "B. env=10, DUI=0", "C. env=0, DUI=1", "D. env=10, DUI=1"))
+          labels = c("A", "B", "C", "D"))
+dev.off()
+
 # leading observations: 
 # deterministic leakage model means high leakage always challenges adaptation (worse values with tens)
 # heteroplasmic ICs maintain heterozygosity over longer time period (better values without hundreds for env = 10)
@@ -84,7 +158,6 @@ for(env in c(0, 2**(1:7))) {
   tdf = read.csv(paste0("inherit-template-change-out-100-1-", env, "-0.500-0.000-0-0-0.00000.csv"))
   mdf = rbind(mdf, tdf)
 }
-
 means.df.100 = mdf %>% 
   group_by(leakage, DUI, nDNA, mu, env) %>%
   summarize(mean_f = mean(end.mean.f/nDNA))
@@ -94,7 +167,6 @@ for(env in c(0, 2**(1:7))) {
   tdf = read.csv(paste0("inherit-template-change-out-100-1-", env, "-0.500-0.000-0-0-0.00100.csv"))
   mdf = rbind(mdf, tdf)
 }
-
 means.df.100.temp.1 = mdf %>% 
   group_by(leakage, DUI, nDNA, mu, env) %>%
   summarize(mean_f = mean(end.mean.f/nDNA))
@@ -104,48 +176,9 @@ for(env in c(0, 2**(1:7))) {
   tdf = read.csv(paste0("inherit-template-change-out-100-1-", env, "-0.500-0.000-0-0-0.10000.csv"))
   mdf = rbind(mdf, tdf)
 }
-
 means.df.100.temp.2 = mdf %>% 
   group_by(leakage, DUI, nDNA, mu, env) %>%
   summarize(mean_f = mean(end.mean.f/nDNA))
-
-g.template = ggarrange(
-  ggplot(means.df.100[means.df.100$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu),
-  ggplot(means.df.100.temp.1[means.df.100.temp.1$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu),
-  ggplot(means.df.100.temp.2[means.df.100.temp.2$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu),
-  nrow=1
-  
-)
-
-g.100 = ggarrange(
-  ggplot(means.df.100[means.df.100$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu),
-  ggplot(means.df.100[means.df.100$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu)
-)
 
 ## smaller population size
 
@@ -154,26 +187,9 @@ for(env in c(0, 2**(1:7))) {
   tdf = read.csv(paste0("inherit-belen-change-out-50-1-", env, "-0.500-0.000-0-0.csv"))
   mdf = rbind(mdf, tdf)
 }
-
 means.df.50 = mdf %>% 
   group_by(leakage, DUI, nDNA, mu, env) %>%
   summarize(mean_f = mean(end.mean.f/nDNA))
-
-
-g.50 = ggarrange(
-  ggplot(means.df.50[means.df.50$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu),
-  ggplot(means.df.50[means.df.50$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu)
-)
 
 ## larger population size
 
@@ -182,26 +198,9 @@ for(env in c(0, 2**(1:7))) {
   tdf = read.csv(paste0("inherit-belen-change-out-200-1-", env, "-0.500-0.000-0-0.csv"))
   mdf = rbind(mdf, tdf)
 }
-
 means.df.200 = mdf %>% 
   group_by(leakage, DUI, nDNA, mu, env) %>%
   summarize(mean_f = mean(end.mean.f/nDNA))
-
-
-g.200 = ggarrange(
-  ggplot(means.df.200[means.df.200$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu),
-  ggplot(means.df.200[means.df.200$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu)
-)
 
 ## heteroplasmy penalty
 
@@ -210,32 +209,157 @@ for(env in c(0, 2**(1:7))) {
   tdf = read.csv(paste0("inherit-belen-change-out-100-1-", env, "-0.500-0.250-0-0.csv"))
   mdf = rbind(mdf, tdf)
 }
-
 means.df.hetpen = mdf %>% 
   group_by(leakage, DUI, nDNA, mu, env) %>%
   summarize(mean_f = mean(end.mean.f/nDNA))
 
+g.all.100.0 = ggplot(means.df.100[means.df.100$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+  facet_grid(env ~ mu)
 
-g.hetpen = ggarrange(
-  ggplot(means.df.hetpen[means.df.hetpen$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+wdf = means.df.100[means.df.100$DUI == 0,]
+wdf$pred = -log(1+wdf$env) / (log(1+wdf$leakage*wdf$nDNA)) - log(1+wdf$mu)*log(1+wdf$nDNA)
+
+ggplot(wdf, aes(x=leakage, y=nDNA, fill=pred)) + geom_tile() +
+  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(env ~ mu)
+
+for(expt.detail in c(0, 1)) {
+  if(expt.detail == 0) {
+    mu.set = c(0.01)
+    env.set = c(64)
+    strip.pos = "none"
+    arrangement = NULL
+  } else {
+    mu.set = c(0,0.0001,0.01)
+    env.set = c(2, 8, 16, 64)
+    strip.pos = "top"
+    arrangement = facet_grid(env ~ mu)
+  }
+  
+  g.sub.100.0 = ggplot(means.df.100[means.df.100$mu %in% mu.set & means.df.100$env %in% env.set & means.df.100$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
     scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
     scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
     scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu),
-  ggplot(means.df.hetpen[means.df.hetpen$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    arrangement + ggtitle("Standard")
+  g.sub.100.1 = ggplot(means.df.100[means.df.100$mu %in% mu.set & means.df.100$env %in% env.set & means.df.100$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
     scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
     scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
     scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    facet_grid(env ~ mu)
-)
+    arrangement + ggtitle("DUI")
+  g.sub.100.temp.1.0 = ggplot(means.df.100.temp.1[means.df.100.temp.1$mu %in% mu.set & means.df.100.temp.1$env %in% env.set & means.df.100.temp.1$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("Templated repair")
+  g.sub.100.temp.2.0 = ggplot(means.df.100.temp.2[means.df.100.temp.2$mu %in% mu.set & means.df.100.temp.2$env %in% env.set & means.df.100.temp.2$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("Templated repair")
+  
+  g.sub.100.temp.1.1 = ggplot(means.df.100.temp.1[means.df.100.temp.1$mu %in% mu.set & means.df.100.temp.1$env %in% env.set & means.df.100.temp.1$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("DUI, templated repair")
+  g.sub.50.0 = ggplot(means.df.50[means.df.50$mu %in% mu.set & means.df.50$env %in% env.set & means.df.50$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("Npop = 50")
+  g.sub.50.1 = ggplot(means.df.50[means.df.50$mu %in% mu.set & means.df.50$env %in% env.set & means.df.50$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("DUI, Npop = 50")
+  g.sub.200.0 = ggplot(means.df.200[means.df.200$mu %in% mu.set & means.df.200$env %in% env.set & means.df.200$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("Npop = 200")
+  g.sub.200.1 = ggplot(means.df.200[means.df.200$mu %in% mu.set & means.df.200$env %in% env.set & means.df.200$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("DUI, Npop = 200")
+  
+  g.sub.hetpen.0 = ggplot(means.df.hetpen[means.df.hetpen$mu %in% mu.set & means.df.hetpen$env %in% env.set & means.df.hetpen$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("h penalty")
+  g.sub.hetpen.1 = ggplot(means.df.hetpen[means.df.hetpen$mu %in% mu.set & means.df.hetpen$env %in% env.set & means.df.hetpen$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
+    arrangement + ggtitle("DUI, h penalty")
+  
+  nl = theme(legend.position = "none")
+  sf = 2
+  if(expt.detail == 0) {
+    png("all-trellises-update.png", width=800*sf, height=500*sf, res=72*sf)
+    print(ggarrange(g.sub.100.0+nl, g.sub.50.0+nl, g.sub.200.0+nl, 
+                    g.sub.100.1+nl, g.sub.100.temp.1.0+nl, g.sub.hetpen.0+nl, 
+                    #labels=c("A. Default", "B. Small popn", "C. Large popn", "D. DUI", "E. Repair", "F. h penalty"),
+                    labels=c("A", "B", "C", "D", "E", "F"),
+                    ncol=3,nrow=2))
+    dev.off()
+  } else {
+    png("all-trellises-update-full.png", width=1200*sf, height=800*sf, res=72*sf)
+    print(ggarrange(g.sub.100.0+nl, g.sub.50.0+nl, g.sub.200.0+nl, 
+                    g.sub.100.1+nl, g.sub.100.temp.1.0+nl, g.sub.hetpen.0+nl, 
+                    g.sub.hetpen.1+nl, 
+#                    labels=c("A. Default", "B. Small popn", "C. Large popn", "D. DUI", "E. Repair", "F. h penalty"),
+                    labels=c("A", "B", "C", "D", "E", "F", "G"),
+                    ncol=4,nrow=2))
+    dev.off()
+  }
+ 
 
-sf = 2
-png("all-trellis.png", width=1400*sf, height=1200*sf, res=72*sf)
-ggarrange(g.100, g.50, g.200, g.hetpen, ncol=2, nrow=2,
-          labels =c("A. 100", "B. 50", "C. 200", "D. 100 hetpen"))
+}
+
+png("main-text-trellis.png", width=600*sf, height=600*sf, res=72*sf)
+print(g.all.100.0 + labs(x="Leakage", y="nDNA", fill="Mean\nfitness"))
 dev.off()
+
+if(FALSE){
+g.all.100.0
+
+#### UH OH WHAT IS WRONG HERE
+sf = 2
+png("all-trellis-update.png", width=1400*sf, height=1200*sf, res=72*sf)
+ggarrange(g.100, g.50, g.200, g.hetpen, g.template, ncol=3, nrow=2,
+          labels =c("A. 100", "B. 50", "C. 200", "D. 100 hetpen", "E. 100 template"))
+dev.off()
+}
 
 ##### empirical fitting
 
@@ -250,8 +374,21 @@ model.R2 = function(x, y) {
   return(1-SSR/SST)
 }
 
+roze.model = function(mu, leakage, nDNA, norg, sc, sm, p) {
+  alpha = leakage
+  B = nDNA
+  N = 2*B
+  n = norg
+  r = 1 - (2*alpha*(1-alpha)*(1-1/N))/(1 - (1-1/B)*(1-1/N)*(1 - 2*alpha*(1-alpha)))
+  Ne = n / (1 + (1-r)*(1 - 2*(1-1/N)*(1-1/B)))
+  S = sc + (1-1/B)*(1-r)*(sm - sc*(1-1/N))
+  u = (1-exp(-2*Ne*S*p))/(1-exp(-2*Ne*S))
+  return(u)
+}
+
 # empirical fit in constant environments
 sub = means.df[means.df$DUI == 0 & means.df$env == 0 & means.df$leakage == 0,]
+sub$roze = roze.model(sub$mu, sub$leakage, sub$nDNA, 100, 1, 0.5, 0.5)
 ggplot(sub, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage))) + 
   geom_point() + geom_abline()
 
@@ -262,12 +399,19 @@ model.R2(sub$mean_f, 1-sub$mu*sqrt(sub$nDNA)/(1-sub$leakage)**2)
 
 # remove the highest-leakage case, which is an outlier to this empirical fit
 sub2 = sub[sub$leakage < 0.5,]
+sub2$roze = roze.model(sub2$mu, sub2$leakage, sub2$nDNA, 100, 1, 0.5, 0.5)
 ggplot(sub2, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage))) + 
   geom_point() + geom_abline()
 model.R2(sub2$mean_f, 1-sub2$mu*sqrt(sub2$nDNA)/(1-sub2$leakage)**2)
+# align with roze
+model.R2(sub2$mean_f, 1-sub2$mu*sqrt(sub2$nDNA)/(sub2$lambda*(1-sub2$leakage))/(1-(sub2$lambda*(1-sub2$leakage))))
 
-png("plot-align-empirical.png", width=400*sf, height=400*sf, res=72*sf)
+ggplot(sub2, aes(x=roze, y=mean_f, color=factor(leakage))) + 
+  geom_point() + geom_abline()
+
+png("plot-align-empirical.png", width=400*sf, height=300*sf, res=72*sf)
 ggplot(sub2, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage))) + 
+  theme_light() + labs(color="Leakage", x="Empirical prediction", y="Mean fitness in simulation") +
   geom_point() + geom_abline()
 dev.off()
 
@@ -313,7 +457,7 @@ for(expt in c("normal", "hetpen", "template")) {
             g.n.good, g.lambda.good)
   
   # LOESS fits to smooth contour plots
-  mod.n = loess(goodn ~ mu + env, data = bests)
+  mod.n = loess(goodn ~ mu + env, data = bests, span = 0.5)
   to.plot.n = bests
   to.plot.n$goodn = predict(mod.n, newdata = to.plot.n, se = FALSE)
   mod.lambda = loess(goodlambda ~ mu + env, data = bests)
@@ -324,25 +468,33 @@ for(expt in c("normal", "hetpen", "template")) {
   g.smooth.n = ggplot() +
     geom_tile(data=bests, aes(x=mu, y=env, fill=goodn)) +
     geom_contour(data=to.plot.n, aes(x=mu, y=env, z=goodn), 
-                 breaks=c((1:10)*20), color="white", alpha=0.5) +
+                 breaks=c((1:10)*20), color="black", alpha=0.5) +
     geom_text_contour(data=to.plot.n, aes(x=mu, y=env, z=goodn), 
-                      breaks=c((1:10)*20), color="white", skip=0, min.size = 0, alpha=0.5) +
+                      breaks=c((1:10)*20), color="black", skip=0, min.size = 0, alpha=1) +
     scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
     scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+    scale_fill_continuous(limits=c(0,200)) +
+    scale_fill_viridis(option="inferno") +
+    theme_light() + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Mutation rate", y = "Environmental\nchange period", fill="Mean\noptimal\nN")
   
   g.smooth.lambda = ggplot() +
     geom_tile(data=bests, aes(x=mu, y=env, fill=goodlambda)) +
     geom_contour(data=to.plot.lambda, aes(x=mu, y=env, z=goodlambda), 
-                 breaks=c((0:5)*0.1), color="white", alpha=0.5) +
+                 breaks=c((0:5)*0.1), color="black", alpha=0.5) +
     geom_text_contour(data=to.plot.lambda, aes(x=mu, y=env, z=goodlambda), 
-                      breaks=c((0:5)*0.1), color="white", skip=0, min.size = 0, alpha=0.5) +
+                      breaks=c((0:5)*0.1), color="black", skip=0, min.size = 0, alpha=1) +
     scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-6, 1e-4, 1e-2, 1)) +
     scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(2**(1:7))) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+    scale_fill_continuous(limits=c(0,0.55)) +
+    scale_fill_viridis(option="inferno") +
+    theme_light() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    labs(x = "Mutation rate", y = "Environmental\nchange period", fill="Mean\noptimal\nleakage")
   
   png(paste0("plot-align-optim-", expt, ".png", collapse=""), width=600*sf, height=300*sf, res=72*sf)
-  print(ggarrange(g.smooth.n, g.smooth.lambda))
+  print(ggarrange(g.smooth.n, g.smooth.lambda, labels=c("A", "B")))
   dev.off()
 }
 
