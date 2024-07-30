@@ -4,9 +4,9 @@
 # takes a command-line argument -- a single string, concatenated with commas or other non-whitespace symbols, determining which aspects of the pipeline will be run
 # the options are:
 
+# default         -- default model structure
 # timeseries      -- example time series
 # altmodels       -- alternative model structures (determinism, ICs)
-# default         -- default model structure
 # templaterepair  -- nonzero templated repair
 # popnsize        -- different population sizes
 # hetpenalty      -- different heteroplasmy penalties
@@ -32,28 +32,28 @@ if [[ $commandstr == *timeseries* ]]; then
 fi
 
 # inherit-old takes coarser steps through parameter space; inherit-template finer
-# arguments: [organismal population size] [homoplasmic ICs] [env change period] [fitness of bad allele] [heteroplasmy penalty] [deterministic reamplification] [deterministic leakage] [template repair rate]
+# arguments: [organismal population size] [homoplasmic ICs] [env change period] [fitness of bad allele] [heteroplasmy penalty] [deterministic reamplification] [deterministic leakage] [for inherit-template, template repair rate]
 # output files are labelled by these arguments (and "old" in the case of inherit-old)
 
 if [[ $commandstr == *altmodels* ]]; then
   # compare the various degrees of freedom
-  ./inherit-old.ce 100 0 0 0.5 0 0 0 0 >tmp &
-  ./inherit-old.ce 100 0 0 0.5 0 0 1 0 >tmp &
-  ./inherit-old.ce 100 0 0 0.5 0 1 0 0 >tmp &
-  ./inherit-old.ce 100 0 0 0.5 0 1 1 0 >tmp &
-  ./inherit-old.ce 100 1 0 0.5 0 0 0 0 >tmp &
-  ./inherit-old.ce 100 1 0 0.5 0 0 1 0 >tmp &
-  ./inherit-old.ce 100 1 0 0.5 0 1 0 0 >tmp &
-  ./inherit-old.ce 100 1 0 0.5 0 1 1 0 >tmp &
+  ./inherit-old.ce 100 0 0 0.5 0 0 0 >tmp &
+  ./inherit-old.ce 100 0 0 0.5 0 0 1 >tmp &
+  ./inherit-old.ce 100 0 0 0.5 0 1 0 >tmp &
+  ./inherit-old.ce 100 0 0 0.5 0 1 1 >tmp &
+  ./inherit-old.ce 100 1 0 0.5 0 0 0 >tmp &
+  ./inherit-old.ce 100 1 0 0.5 0 0 1 >tmp &
+  ./inherit-old.ce 100 1 0 0.5 0 1 0 >tmp &
+  ./inherit-old.ce 100 1 0 0.5 0 1 1 >tmp &
   
-  ./inherit-old.ce 100 0 10 0.5 0 0 0 0 >tmp &
-  ./inherit-old.ce 100 0 10 0.5 0 0 1 0 >tmp &
-  ./inherit-old.ce 100 0 10 0.5 0 1 0 0 >tmp &
-  ./inherit-old.ce 100 0 10 0.5 0 1 1 0 >tmp &
-  ./inherit-old.ce 100 1 10 0.5 0 0 0 0 >tmp &
-  ./inherit-old.ce 100 1 10 0.5 0 0 1 0 >tmp &
-  ./inherit-old.ce 100 1 10 0.5 0 1 0 0 >tmp &
-  ./inherit-old.ce 100 1 10 0.5 0 1 1 0 >tmp &
+  ./inherit-old.ce 100 0 10 0.5 0 0 0 >tmp &
+  ./inherit-old.ce 100 0 10 0.5 0 0 1 >tmp &
+  ./inherit-old.ce 100 0 10 0.5 0 1 0 >tmp &
+  ./inherit-old.ce 100 0 10 0.5 0 1 1 >tmp &
+  ./inherit-old.ce 100 1 10 0.5 0 0 0 >tmp &
+  ./inherit-old.ce 100 1 10 0.5 0 0 1 >tmp &
+  ./inherit-old.ce 100 1 10 0.5 0 1 0 >tmp &
+  ./inherit-old.ce 100 1 10 0.5 0 1 1 >tmp &
 fi
 
 if [[ $commandstr == *default* ]]; then
