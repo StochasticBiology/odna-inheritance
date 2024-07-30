@@ -28,37 +28,6 @@ gcc -o3 inherit-template-ts.c -lm -o inherit-template-ts.ce
 ./inherit-old.ce 100 1 10 0.5 0 1 0 0 >tmp &
 ./inherit-old.ce 100 1 10 0.5 0 1 1 0 >tmp &
 
-# align with BGP version (heteroplasmic ICs, deterministic leakage, deterministic reamplification)
-./inherit-old.ce 100 0 0 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 5 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 10 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 20 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 30 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 40 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 50 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 60 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 70 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 80 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 90 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 100 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 150 0.5 0 1 1 0 >tmp &
-./inherit-old.ce 100 0 200 0.5 0 1 1 0 >tmp &
-
-# align with stepping-stone version (homoplasmic ICs, deterministic leakage, deterministic reamplification)
-./inherit-old.ce 100 1 0 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 1 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 2 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 3 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 4 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 5 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 6 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 7 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 8 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 9 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 10 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 15 0.5 0 1 1 0 > tmp &
-./inherit-old.ce 100 1 20 0.5 0 1 1 0 > tmp &
-
 # default experiment (homoplasmic ICs, stochastic leakage, stochastic reamplification)
 ./inherit-template.ce 100 1 0 0.5 0 0 0 0 > tmp &
 ./inherit-template.ce 100 1 2 0.5 0 0 0 0 > tmp &
@@ -119,7 +88,7 @@ gcc -o3 inherit-template-ts.c -lm -o inherit-template-ts.ce
 ./inherit-template.ce 100 1 64 0.5 0.05 0 0 0 > tmp &
 ./inherit-template.ce 100 1 128 0.5 0.05 0 0 0 > tmp &
 
-# bigger heteroplasmy penalty (not run as of 29 apr)
+# bigger heteroplasmy penalty 
 ./inherit-template.ce 100 1 0 0.5 0.25 0 0 0 > tmp &
 ./inherit-template.ce 100 1 2 0.5 0.25 0 0 0 > tmp &
 ./inherit-template.ce 100 1 4 0.5 0.25 0 0 0 > tmp &
@@ -129,7 +98,17 @@ gcc -o3 inherit-template-ts.c -lm -o inherit-template-ts.ce
 ./inherit-template.ce 100 1 64 0.5 0.25 0 0 0 > tmp &
 ./inherit-template.ce 100 1 128 0.5 0.25 0 0 0 > tmp &
 
-# more comparable mitotype fitness (not run as of 29 apr)
+# bigger heteroplasmy penalty, bigger population 
+./inherit-template.ce 500 1 0 0.5 0.25 0 0 0 > tmp &
+./inherit-template.ce 500 1 2 0.5 0.25 0 0 0 > tmp &
+./inherit-template.ce 500 1 4 0.5 0.25 0 0 0 > tmp &
+./inherit-template.ce 500 1 8 0.5 0.25 0 0 0 > tmp &
+./inherit-template.ce 500 1 16 0.5 0.25 0 0 0 > tmp &
+./inherit-template.ce 500 1 32 0.5 0.25 0 0 0 > tmp &
+./inherit-template.ce 500 1 64 0.5 0.25 0 0 0 > tmp &
+./inherit-template.ce 500 1 128 0.5 0.25 0 0 0 > tmp &
+
+# more comparable mitotype fitness
 ./inherit-template.ce 100 1 0 0.9 0 0 0 0 > tmp &
 ./inherit-template.ce 100 1 2 0.9 0 0 0 0 > tmp &
 ./inherit-template.ce 100 1 4 0.9 0 0 0 0 > tmp &
@@ -139,7 +118,7 @@ gcc -o3 inherit-template-ts.c -lm -o inherit-template-ts.ce
 ./inherit-template.ce 100 1 64 0.9 0 0 0 0 > tmp &
 ./inherit-template.ce 100 1 128 0.9 0 0 0 0 > tmp &
 
-# more distinct mitotype fitness (not run as of 29 apr)
+# more distinct mitotype fitness
 ./inherit-template.ce 100 1 0 0.1 0 0 0 0 > tmp &
 ./inherit-template.ce 100 1 2 0.1 0 0 0 0 > tmp &
 ./inherit-template.ce 100 1 4 0.1 0 0 0 0 > tmp &
