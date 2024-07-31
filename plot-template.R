@@ -1,5 +1,6 @@
 library(reshape2)
 library(ggplot2)
+library(viridis)
 library(dplyr)
 library(metR)
 library(ggpubr)
@@ -63,7 +64,7 @@ for(env in c(0, 10)) {
   for(ics in c(0,1)) {
     for(leak in c(0,1)) {
       for(reamp in c(0,1)) {
-        tdf = read.csv(paste0("../odna-inheritance-april-24-desktop/inherit-belen-old-change-out-100-", ics, "-", env, "-0.500-0.000-", leak, "-", reamp, ".csv"))
+        tdf = read.csv(paste0("inherit-belen-old-change-out-100-", ics, "-", env, "-0.500-0.000-", leak, "-", reamp, ".csv"))
         mdf = rbind(mdf, tdf)
       }
     }
@@ -184,7 +185,7 @@ means.df.100.temp.2 = mdf %>%
 
 mdf = data.frame()
 for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-belen-change-out-50-1-", env, "-0.500-0.000-0-0.csv"))
+  tdf = read.csv(paste0("inherit-template-change-out-50-1-", env, "-0.500-0.000-0-0-0.00000.csv"))
   mdf = rbind(mdf, tdf)
 }
 means.df.50 = mdf %>% 
@@ -195,7 +196,7 @@ means.df.50 = mdf %>%
 
 mdf = data.frame()
 for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-belen-change-out-200-1-", env, "-0.500-0.000-0-0.csv"))
+  tdf = read.csv(paste0("inherit-template-change-out-200-1-", env, "-0.500-0.000-0-0-0.00000.csv"))
   mdf = rbind(mdf, tdf)
 }
 means.df.200 = mdf %>% 
@@ -206,7 +207,7 @@ means.df.200 = mdf %>%
 
 mdf = data.frame()
 for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-belen-change-out-100-1-", env, "-0.500-0.250-0-0.csv"))
+  tdf = read.csv(paste0("inherit-template-change-out-100-1-", env, "-0.500-0.250-0-0-0.00000.csv"))
   mdf = rbind(mdf, tdf)
 }
 means.df.hetpen = mdf %>% 
@@ -350,17 +351,6 @@ png("main-text-trellis.png", width=600*sf, height=600*sf, res=72*sf)
 print(g.all.100.0 + labs(x="Leakage", y="nDNA", fill="Mean\nfitness"))
 dev.off()
 
-if(FALSE){
-g.all.100.0
-
-#### UH OH WHAT IS WRONG HERE
-sf = 2
-png("all-trellis-update.png", width=1400*sf, height=1200*sf, res=72*sf)
-ggarrange(g.100, g.50, g.200, g.hetpen, g.template, ncol=3, nrow=2,
-          labels =c("A. 100", "B. 50", "C. 200", "D. 100 hetpen", "E. 100 template"))
-dev.off()
-}
-
 ##### empirical fitting
 
 means.df = means.df.100
@@ -498,38 +488,37 @@ for(expt in c("normal", "hetpen", "template")) {
   dev.off()
 }
 
-##### comparison of BGP and aligned dynamics -- for debugging only
-
-# read a particular BGP example, produced by Inherit_comparison.py
-
-dft = data.frame()
-env = 8; mu = 0.01;
-for(seed in c(0, 1, 2, 3, 4, 5, 6, 200, 500, 666)) {
-  for(Ns in c(10*2**(0:5))) {
-    for(lambda in c(0,"0.0005",0.001,0.002,0.004,0.008,0.016,0.032,0.064,0.13,0.26,0.51)) {
-      tdf = read.csv(paste0("f_env_", env, "_lambda_", lambda, "_mu_", mu, "_N_", Ns, "_seed_", seed, ".csv"))
-      dft = rbind(dft, data.frame(meanf=mean(tdf[-1,499]),lambda=lambda,Ns=Ns,seed=seed))
+##### comparison of BGP and aligned dynamics -- for debugging only, not used in final article
+if(FALSE) {
+  # read a particular BGP example, produced by Inherit_comparison.py
+  
+  dft = data.frame()
+  env = 8; mu = 0.01;
+  for(seed in c(0, 1, 2, 3, 4, 5, 6, 200, 500, 666)) {
+    for(Ns in c(10*2**(0:5))) {
+      for(lambda in c(0,"0.0005",0.001,0.002,0.004,0.008,0.016,0.032,0.064,0.13,0.26,0.51)) {
+        tdf = read.csv(paste0("f_env_", env, "_lambda_", lambda, "_mu_", mu, "_N_", Ns, "_seed_", seed, ".csv"))
+        dft = rbind(dft, data.frame(meanf=mean(tdf[-1,499]),lambda=lambda,Ns=Ns,seed=seed))
+      }
     }
   }
+  
+  dft$lambda = as.numeric(dft$lambda)
+  means.df = dft %>% 
+    group_by(lambda, Ns) %>%
+    summarize(mean_f = mean(meanf/Ns))
+  
+  g.igj = ggplot(means.df.100[means.df.100$DUI == 0 & means.df.100$env==8 & means.df.100$mu == 0.01 & means.df.100$nDNA < 500,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) 
+  
+  g.bgp = ggplot(means.df, aes(x=lambda, y=Ns, fill=mean_f)) + geom_tile() +
+    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
+    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) 
+  
+  ggarrange(g.igj, g.bgp, labels=c("IGJ", "BGP"))
 }
-
-dft$lambda = as.numeric(dft$lambda)
-means.df = dft %>% 
-  group_by(lambda, Ns) %>%
-  summarize(mean_f = mean(meanf/Ns))
-
-g.igj = ggplot(means.df.100[means.df.100$DUI == 0 & means.df.100$env==8 & means.df.100$mu == 0.01 & means.df.100$nDNA < 500,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) 
-
-g.bgp = ggplot(means.df, aes(x=lambda, y=Ns, fill=mean_f)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) 
-
-ggarrange(g.igj, g.bgp, labels=c("IGJ", "BGP"))
-
-
