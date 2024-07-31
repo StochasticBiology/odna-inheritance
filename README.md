@@ -14,7 +14,7 @@ Outline
 
 The simulation code is split into several submodules for tractability. Each submodule can be invoked by passing its name as part of a command-line argument to `run-template.sh`. (To run `run-template.sh` from the command line, you will probably need to mark it as executable, with e.g. `chmod +x run-template.sh`). The command-line argument should be a single string, concatenated with commas or other non-whitespace symbols, determining which aspects of the pipeline will be run. For example,
 
-`./run-all.sh default,timeseries` 
+`./run-template.sh default,timeseries` 
 
 would run the first two submodules listed below.
 
