@@ -5,10 +5,10 @@
 #define RND drand48()    // random number between 0 and 1
 #define MAXPOP 2000         // population size
 #define NGEN 500        // number of generations in simulation
-#define NSAMP 100        // number of samples to run
+#define NSAMP 1        // number of samples to run
 
 //#define _MEANOUTPUT
-#define _CHANGEOUTPUT
+#define _FULLOUTPUT
 
 // structure to store an individual's genetic makeup -- number of genomes of type a, b, c
 typedef struct {
@@ -86,9 +86,11 @@ int main(int argc, char *argv[])
   double meanmean, meanmeanh, meannorm;
   double meanw, meanwnorm;
   int ICs, DET_REAMP, DET_LEAK;
+  double TEMPLATE;
+  int arep, brep, crep;
   
-  if(argc != 8) {
-    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp, deterministic leakage\n");
+  if(argc != 9) {
+    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp, deterministic leakage, templating rate\n");
     exit(0);
   }
   NPOP = atoi(argv[1]);
@@ -98,40 +100,43 @@ int main(int argc, char *argv[])
   penalty = atof(argv[5]);
   DET_REAMP = atoi(argv[6]);
   DET_LEAK = atoi(argv[7]);
+  TEMPLATE = atof(argv[8]);
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-belen-full-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
+  sprintf(fstr, "inherit-template-full-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE);
   fp = fopen(fstr, "w");
-  fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
+  fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-belen-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
+  sprintf(fstr, "inherit-template-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE);
   fpm = fopen(fstr, "w");
-  fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
+  fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
 #endif
 
 #ifdef _CHANGEOUTPUT
-  sprintf(fstr, "inherit-belen-change-out-%i-%i-%i-%.3f-%.3f-%i-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK);
+  sprintf(fstr, "inherit-template-change-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE);
   fpc = fopen(fstr, "w");
-  fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,det.leak,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
+  fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
 #endif
 
   // loop over different environment types
   //  for(env = 0; env <= 6; env++)
   {
     // loop over DNA population size
-    for(NDNA = 10; NDNA <= 1200; NDNA *= 2)
+    NDNA = 50;
+    //  for(NDNA = 10; NDNA <= 100; NDNA *= 10)
       {
 	// loop over different mutation rates
-	for(MU = 0; MU <= 1e-2; MU *= 10)
+	for(MU = 0; MU <= 2e-4; MU += 2e-4)
 	  {
 	    // loop over doubly-uniparental inheritance
-	    for(DUI = 0; DUI <= 1; DUI++)
+	    //	    for(DUI = 0; DUI <= 1; DUI++)
+	    DUI = 0;
 	    {
 	      // loop over paternal leakage
-	      for(LEAKAGE = 0; LEAKAGE <= 0.52; LEAKAGE *= 2)
+	      for(LEAKAGE = 0; LEAKAGE <= 0.25; LEAKAGE += 0.25)
 		{
 		  // loop over instances for each parameterisation
 		    for(expt = 0; expt < NSAMP; expt++)
@@ -192,7 +197,7 @@ int main(int argc, char *argv[])
 			    varf /= (NPOP-1);
 #ifdef _MEANOUTPUT
 			    if(expt < 4)
-			      fprintf(fpm, "%i,%i,%f,%f,%i,%i,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale, penalty, DET_REAMP, DET_LEAK, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf, meanh);
+			      fprintf(fpm, "%i,%i,%f,%f,%i,%i,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf, meanh);
 #endif
 
 			    // sample mean fitness after adaptive final section
@@ -211,9 +216,9 @@ int main(int argc, char *argv[])
 			    // output population
 			    for(i = 0; i < NPOP; i++)
 			      {
-				if(t == 10 || t == 100 || t == 500 || t == 900)
+				//	if(t == 10 || t == 100 || t == 500 || t == 900)
 				  {
-				    fprintf(fp, "%i,%i,%f,%f,%i,%i,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty, DET_REAMP, DET_LEAK, env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
+				    fprintf(fp, "%i,%i,%f,%f,%i,%i,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty, DET_REAMP, DET_LEAK, TEMPLATE, env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
 				  }
 			      }
 #endif
@@ -260,6 +265,18 @@ int main(int argc, char *argv[])
 				    newI[i].b -= bmu; newI[i].c += bmu;
 				  }
 
+				// templated repair
+				if(TEMPLATE > 0)
+				  {
+				    // decide how many mutants get template-repaired overall
+				    crep = binomial(newI[i].c, TEMPLATE*(newI[i].a+newI[i].b));
+				    // decide how many were templated from type a
+				    arep = binomial(crep, (double)(newI[i].a)/(newI[i].a+newI[i].b));
+				    brep = crep-arep;
+				    newI[i].a += arep; newI[i].b += brep;
+				    newI[i].c -= crep;
+				  }
+				
 				// deterministic reamplification
 				if(DET_REAMP)
 				  {
@@ -292,14 +309,14 @@ int main(int argc, char *argv[])
 			      }
 			  }
 #ifdef _CHANGEOUTPUT
-			fprintf(fpc, "%i,%i,%f,%f,%i,%i,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
+			fprintf(fpc, "%i,%i,%f,%f,%i,%i,%f,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, TEMPLATE, env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
 #endif
 		    
 		      }
-		    if(LEAKAGE == 0) LEAKAGE = 5e-4;
+		    //		    if(LEAKAGE == 0) LEAKAGE = 5e-4;
 		  }
 	      }
-	    if(MU == 0) MU = 1e-7;
+	    //	    if(MU == 0) MU = 1e-7;
 	  }
       }
   }
