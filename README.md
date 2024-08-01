@@ -26,7 +26,7 @@ The options are:
 * `templaterepair`  -- nonzero templated repair
 * `popnsize`        -- different population sizes
 * `hetpenalty`      -- different heteroplasmy penalties
-* `bighetpenalty`   -- heteroplasmy penalty with large population
+* `bigger`          -- heteroplasmy penalty with large population
 * `fitnessdiffs`    -- different fitness differences between alleles
 
 `timeseries` takes a few seconds; each of the others will probably take several dozen core-days (each runs one or more sets of about ten parallel simulations, most of which take several hours or so).
