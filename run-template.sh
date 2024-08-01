@@ -27,8 +27,8 @@ gcc -o3 inherit-template.c -lm -o inherit-template.ce
 gcc -o3 inherit-template-ts.c -lm -o inherit-template-ts.ce
 
 if [[ $commandstr == *timeseries* ]]; then
-  ./inherit-template-ts.ce 100 1 0 0.5 0 0 0 0 > tmp &
-  ./inherit-template-ts.ce 100 1 16 0.5 0 0 0 0 > tmp &  
+  ./inherit-template-ts.ce 10 1 0 0.5 0 0 0 0 > tmp &
+  ./inherit-template-ts.ce 10 1 8 0.5 0 0 0 0 > tmp &  
 fi
 
 # inherit-old takes coarser steps through parameter space; inherit-template finer
