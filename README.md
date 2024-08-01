@@ -29,7 +29,7 @@ The options are:
 * `bighetpenalty`   -- heteroplasmy penalty with large population
 * `fitnessdiffs`    -- different fitness differences between alleles
 
-`timeseries` takes a few seconds; each of the others will take several dozen core-hours (each runs one or more sets of about ten parallel simulations, most of which take an hour or so).
+`timeseries` takes a few seconds; each of the others will probably take several dozen core-days (each runs one or more sets of about ten parallel simulations, most of which take several hours or so).
 
 Following the simulation code, `plot-template.R` plots everything and performs some statistical analysis.
 
