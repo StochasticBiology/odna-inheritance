@@ -167,3 +167,26 @@ if [[ $commandstr == *fitnessdiffs* ]]; then
   ./inherit-template.ce 100 1 64 0.1 0 0 0 0 > tmp &
   ./inherit-template.ce 100 1 128 0.1 0 0 0 0 > tmp &
 fi
+
+# post review
+gcc -o3 inherit-comp.c -lm -o inherit-comp.ce
+./inherit-comp.ce 100 0 0 0 1
+
+gcc -o3 inherit-update.c -lm -o inherit-update.ce
+  ./inherit-update.ce 100 1 0 0.5 0 0 0 0 0.75 > tmp &
+  ./inherit-update.ce 100 1 2 0.5 0 0 0 0 0.75 > tmp &
+  ./inherit-update.ce 100 1 4 0.5 0 0 0 0 0.75 > tmp &
+  ./inherit-update.ce 100 1 8 0.5 0 0 0 0 0.75 > tmp &
+  ./inherit-update.ce 100 1 16 0.5 0 0 0 0 0.75 > tmp &
+  ./inherit-update.ce 100 1 32 0.5 0 0 0 0 0.75 > tmp &
+  ./inherit-update.ce 100 1 64 0.5 0 0 0 0 0.75 > tmp &
+  ./inherit-update.ce 100 1 128 0.5 0 0 0 0 0.75 > tmp &
+
+  ./inherit-update.ce 100 1 0 0.5 0 0 0 0 1.5 > tmp &
+  ./inherit-update.ce 100 1 2 0.5 0 0 0 0 1.5 > tmp &
+  ./inherit-update.ce 100 1 4 0.5 0 0 0 0 1.5 > tmp &
+  ./inherit-update.ce 100 1 8 0.5 0 0 0 0 1.5 > tmp &
+  ./inherit-update.ce 100 1 16 0.5 0 0 0 0 1.5 > tmp &
+  ./inherit-update.ce 100 1 32 0.5 0 0 0 0 1.5 > tmp &
+  ./inherit-update.ce 100 1 64 0.5 0 0 0 0 1.5 > tmp &
+  ./inherit-update.ce 100 1 128 0.5 0 0 0 0 1.5 > tmp &
