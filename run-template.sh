@@ -12,6 +12,10 @@
 # hetpenalty      -- different heteroplasmy penalties
 # bigger          -- heteroplasmy penalty with large population
 # fitnessdiffs    -- different fitness differences between alleles
+# competition     -- evolutionary competition between strategies*
+# multilevel      -- within-organism selective differences*
+
+# * introduced following peer review
 
 # process command-line arguments
 if [ $# -eq 0 ]
@@ -168,10 +172,15 @@ if [[ $commandstr == *fitnessdiffs* ]]; then
   ./inherit-template.ce 100 1 128 0.1 0 0 0 0 > tmp &
 fi
 
-# post review
-gcc -o3 inherit-comp.c -lm -o inherit-comp.ce
-./inherit-comp.ce 100 0 0 0 1
+### post review
+# evolutionary experiment -- organisms can have different strategies, which ones are evolutionarily stable when competed under different conditions?
+if [[ $commandstr == *competition* ]]; then
+  gcc -o3 inherit-comp.c -lm -o inherit-comp.ce
+  ./inherit-comp.ce 100 0 0 0 1
+fi
 
+# organelle alleles have different amplification rates (within-organism selection)
+if [[ $commandstr == *multilevel* ]]; then
 gcc -o3 inherit-update.c -lm -o inherit-update.ce
   ./inherit-update.ce 100 1 0 0.5 0 0 0 0 0.75 > tmp &
   ./inherit-update.ce 100 1 2 0.5 0 0 0 0 0.75 > tmp &
@@ -190,3 +199,4 @@ gcc -o3 inherit-update.c -lm -o inherit-update.ce
   ./inherit-update.ce 100 1 32 0.5 0 0 0 0 1.5 > tmp &
   ./inherit-update.ce 100 1 64 0.5 0 0 0 0 1.5 > tmp &
   ./inherit-update.ce 100 1 128 0.5 0 0 0 0 1.5 > tmp &
+fi
