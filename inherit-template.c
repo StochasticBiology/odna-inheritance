@@ -86,11 +86,11 @@ int main(int argc, char *argv[])
   double meanmean, meanmeanh, meannorm;
   double meanw, meanwnorm;
   int ICs, DET_REAMP, DET_LEAK;
-  double TEMPLATE;
+  double TEMPLATE, FITNESSB, FITNESSC;
   int arep, brep, crep;
   
-  if(argc != 9) {
-    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp, deterministic leakage, templating rate\n");
+  if(argc != 11) {
+    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp, deterministic leakage, templating rate, rel int fitness of B allele, rel int fitness of C allele\n");
     exit(0);
   }
   NPOP = atoi(argv[1]);
@@ -101,24 +101,26 @@ int main(int argc, char *argv[])
   DET_REAMP = atoi(argv[6]);
   DET_LEAK = atoi(argv[7]);
   TEMPLATE = atof(argv[8]);
+  FITNESSB = atof(argv[9]);
+  FITNESSC = atof(argv[10]);
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-template-full-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE);
+  sprintf(fstr, "inherit-template-full-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC);
   fp = fopen(fstr, "w");
-  fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
+  fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-template-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE);
+  sprintf(fstr, "inherit-template-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC);
   fpm = fopen(fstr, "w");
-  fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
+  fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
 #endif
 
 #ifdef _CHANGEOUTPUT
-  sprintf(fstr, "inherit-template-change-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE);
+  sprintf(fstr, "inherit-template-change-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC);
   fpc = fopen(fstr, "w");
-  fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
+  fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
 #endif
 
   // loop over different environment types
@@ -195,7 +197,7 @@ int main(int argc, char *argv[])
 			    varf /= (NPOP-1);
 #ifdef _MEANOUTPUT
 			    if(expt < 4)
-			      fprintf(fpm, "%i,%i,%f,%f,%i,%i,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf, meanh);
+			      fprintf(fpm, "%i,%i,%f,%f,%i,%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESS, env, NDNA, MU, DUI, LEAKAGE, expt, t, meanf, varf, meanh);
 #endif
 
 			    // sample mean fitness after adaptive final section
@@ -216,7 +218,7 @@ int main(int argc, char *argv[])
 			      {
 				if(t == 10 || t == 100 || t == 500 || t == 900)
 				  {
-				    fprintf(fp, "%i,%i,%f,%f,%i,%i,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty, DET_REAMP, DET_LEAK, TEMPLATE, env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
+				    fprintf(fp, "%i,%i,%f,%f,%i,%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESS, env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
 				  }
 			      }
 #endif
@@ -235,8 +237,8 @@ int main(int argc, char *argv[])
 				for(j = NPOP/2; cs[j] < ball; j++);
 				dad = j;
 
-				// if we're allowing DUI, with prob 0.5, treat the father as the "mother" (hence inherit from father)
-				if(DUI && RND < 0.5)
+				// if we're allowing DUI, for the males of the new population, treat the father as the "mother" (hence inherit from father)
+				if(DUI && i > NPOP/2)
 				  {
 				    j = mum; mum = dad; dad = j;
 				  }
@@ -291,8 +293,8 @@ int main(int argc, char *argv[])
 			      
 				while(newI[i].a+newI[i].b+newI[i].c != NDNA)
 				  {
-				    pa = (double)newI[i].a/(newI[i].a+newI[i].b+newI[i].c);
-				    pb = (double)newI[i].b/(newI[i].a+newI[i].b+newI[i].c);
+				    pa = (double)newI[i].a          / (newI[i].a + FITNESSB*newI[i].b + FITNESSC*newI[i].c);
+				    pb = (double)newI[i].b*FITNESSB / (newI[i].a + FITNESSB*newI[i].b + FITNESSC*newI[i].c);
 				    r = RND;
 				    if(r < pa) newI[i].a += change;
 				    else if(r < pa+pb) newI[i].b += change;
@@ -307,7 +309,7 @@ int main(int argc, char *argv[])
 			      }
 			  }
 #ifdef _CHANGEOUTPUT
-			fprintf(fpc, "%i,%i,%f,%f,%i,%i,%f,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, TEMPLATE, env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
+			fprintf(fpc, "%i,%i,%f,%f,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC, env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
 #endif
 		    
 		      }

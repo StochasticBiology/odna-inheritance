@@ -151,75 +151,81 @@ ggplot(means.df[means.df$env==10,]) +
   facet_wrap(~ label)
 # DUI gives a modest advantage
 
+############## main block for visualisations
+
 #### finer steps through parameter space
 
+# general function to read in data output
+read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5, 
+                         penalty = 0, TEMPLATE = 0, FITNESSB = 1, FITNESSC = 1) {
+  mdf = data.frame()
+  for(env in c(0, 2**(1:7))) {
+    tdf = read.csv(sprintf("inherit-template-change-out-%i-%i-%i-%.3f-%.3f-0-0-%.5f-%.2f-%.2f.csv", 
+                           NPOP, ICs, env, scale, penalty, TEMPLATE, FITNESSB, FITNESSC))
+    mdf = rbind(mdf, tdf)
+  }
+  return( mdf %>% 
+    group_by(leakage, DUI, nDNA, mu, env) %>%
+    summarize(mean_f = mean(end.mean.f/nDNA))
+  )
+}
+
 ## default experiment NB filename system updates
-mdf = data.frame()
-for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-template-change-out-100-1-", env, "-0.500-0.000-0-0-0.00000.csv"))
-  mdf = rbind(mdf, tdf)
-}
-means.df.100 = mdf %>% 
-  group_by(leakage, DUI, nDNA, mu, env) %>%
-  summarize(mean_f = mean(end.mean.f/nDNA))
 
-mdf = data.frame()
-for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-template-change-out-100-1-", env, "-0.500-0.000-0-0-0.00100.csv"))
-  mdf = rbind(mdf, tdf)
-}
-means.df.100.temp.1 = mdf %>% 
-  group_by(leakage, DUI, nDNA, mu, env) %>%
-  summarize(mean_f = mean(end.mean.f/nDNA))
-
-mdf = data.frame()
-for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-template-change-out-100-1-", env, "-0.500-0.000-0-0-0.10000.csv"))
-  mdf = rbind(mdf, tdf)
-}
-means.df.100.temp.2 = mdf %>% 
-  group_by(leakage, DUI, nDNA, mu, env) %>%
-  summarize(mean_f = mean(end.mean.f/nDNA))
+means.df.100 = read.datafile()
+## templated repair rate 1
+means.df.100.temp.1 = read.datafile(TEMPLATE = 0.001)
+## templated repair rate 2
+means.df.100.temp.2 = read.datafile(TEMPLATE = 0.1)
 
 ## smaller population size
-
-mdf = data.frame()
-for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-template-change-out-50-1-", env, "-0.500-0.000-0-0-0.00000.csv"))
-  mdf = rbind(mdf, tdf)
-}
-means.df.50 = mdf %>% 
-  group_by(leakage, DUI, nDNA, mu, env) %>%
-  summarize(mean_f = mean(end.mean.f/nDNA))
-
+means.df.50 = read.datafile(NPOP = 50)
 ## larger population size
-
-mdf = data.frame()
-for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-template-change-out-200-1-", env, "-0.500-0.000-0-0-0.00000.csv"))
-  mdf = rbind(mdf, tdf)
-}
-means.df.200 = mdf %>% 
-  group_by(leakage, DUI, nDNA, mu, env) %>%
-  summarize(mean_f = mean(end.mean.f/nDNA))
+means.df.200 = read.datafile(NPOP = 200)
 
 ## heteroplasmy penalty
+means.df.hetpen = read.datafile(penalty = 0.25)
 
-mdf = data.frame()
-for(env in c(0, 2**(1:7))) {
-  tdf = read.csv(paste0("inherit-template-change-out-100-1-", env, "-0.500-0.250-0-0-0.00000.csv"))
-  mdf = rbind(mdf, tdf)
+###############
+###### this section added after peer review: looking at different within-cell fitnesses
+
+## postivie/negative cellular fitness for B/C
+means.df.fit.neg.b = read.datafile(FITNESSB = 0.91)
+means.df.fit.pos.b = read.datafile(FITNESSB = 1.1)
+means.df.fit.neg.c = read.datafile(FITNESSC = 0.91)
+means.df.fit.pos.c = read.datafile(FITNESSC = 1.1)
+
+summarize(mean_f = mean(end.mean.f/nDNA))
+
+mu.set = c(0,0.0001,0.01)
+env.set = c(2, 8, 16, 64)
+strip.pos = "top"
+arrangement = facet_grid(env ~ mu)
+
+g.format = list(geom_tile(aes(x=leakage, y=nDNA, fill=mean_f)),
+                scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)),
+  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)),
+  labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness"),
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)),
+  arrangement)
+
+pull.set = function(df, DUI = 0) {
+  return(df[df$mu %in% mu.set & df$env %in% env.set & df$DUI == DUI,])
 }
-means.df.hetpen = mdf %>% 
-  group_by(leakage, DUI, nDNA, mu, env) %>%
-  summarize(mean_f = mean(end.mean.f/nDNA))
 
-g.all.100.0 = ggplot(means.df.100[means.df.100$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-  scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-  scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-  facet_grid(env ~ mu)
+g.sub.fit.neg.b = ggplot(pull.set(means.df.fit.neg.b)) + g.format + ggtitle("-ve B")
+g.sub.fit.pos.b = ggplot(pull.set(means.df.fit.pos.b)) + g.format + ggtitle("+ve B")
+g.sub.fit.neg.c = ggplot(pull.set(means.df.fit.neg.c)) + g.format + ggtitle("-ve C")
+g.sub.fit.pos.c = ggplot(pull.set(means.df.fit.pos.c)) + g.format + ggtitle("+ve C")
+
+ggarrange(g.sub.fit.neg.b, g.sub.fit.pos.b,
+          g.sub.fit.neg.c, g.sub.fit.pos.c)
+
+###### end of new section
+###############
+
+g.all.100.0 = ggplot(means.df.100[means.df.100$DUI == 0,]) +g.format
 
 wdf = means.df.100[means.df.100$DUI == 0,]
 wdf$pred = -log(1+wdf$env) / (log(1+wdf$leakage*wdf$nDNA)) - log(1+wdf$mu)*log(1+wdf$nDNA)
@@ -243,85 +249,20 @@ for(expt.detail in c(0, 1)) {
     arrangement = facet_grid(env ~ mu)
   }
   
-  g.sub.100.0 = ggplot(means.df.100[means.df.100$mu %in% mu.set & means.df.100$env %in% env.set & means.df.100$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("Standard")
-  g.sub.100.1 = ggplot(means.df.100[means.df.100$mu %in% mu.set & means.df.100$env %in% env.set & means.df.100$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("DUI")
-  g.sub.100.temp.1.0 = ggplot(means.df.100.temp.1[means.df.100.temp.1$mu %in% mu.set & means.df.100.temp.1$env %in% env.set & means.df.100.temp.1$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("Templated repair")
-  g.sub.100.temp.2.0 = ggplot(means.df.100.temp.2[means.df.100.temp.2$mu %in% mu.set & means.df.100.temp.2$env %in% env.set & means.df.100.temp.2$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("Templated repair")
+  g.sub.100.0 = ggplot(pull.set(means.df.100)) + g.format + ggtitle("Standard")
+  g.sub.100.1 = ggplot(pull.set(means.df.100, DUI=1)) + g.format + ggtitle("Standard")
+  g.sub.100.temp.1.0 = ggplot(pull.set(means.df.100.temp.1)) + g.format + ggtitle("Templated repair")
+  g.sub.100.temp.2.0 = ggplot(pull.set(means.df.100.temp.2)) + g.format + ggtitle("Templated repair")
+
+  g.sub.100.temp.1.1 = ggplot(pull.set(means.df.100.temp.1, DUI=1)) + g.format + ggtitle("DUI, templated repair")
+
+  g.sub.50.0 = ggplot(pull.set(means.df.50)) + g.format + ggtitle("Npop = 50")
+  g.sub.50.1 = ggplot(pull.set(means.df.50, DUI=1)) + g.format + ggtitle("DUI, Npop = 50")
+  g.sub.200.0 = ggplot(pull.set(means.df.200)) + g.format + ggtitle("Npop = 200")
+  g.sub.200.1 = ggplot(pull.set(means.df.200, DUI=1)) + g.format + ggtitle("DUI, Npop = 200")
   
-  g.sub.100.temp.1.1 = ggplot(means.df.100.temp.1[means.df.100.temp.1$mu %in% mu.set & means.df.100.temp.1$env %in% env.set & means.df.100.temp.1$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("DUI, templated repair")
-  g.sub.50.0 = ggplot(means.df.50[means.df.50$mu %in% mu.set & means.df.50$env %in% env.set & means.df.50$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("Npop = 50")
-  g.sub.50.1 = ggplot(means.df.50[means.df.50$mu %in% mu.set & means.df.50$env %in% env.set & means.df.50$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("DUI, Npop = 50")
-  g.sub.200.0 = ggplot(means.df.200[means.df.200$mu %in% mu.set & means.df.200$env %in% env.set & means.df.200$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("Npop = 200")
-  g.sub.200.1 = ggplot(means.df.200[means.df.200$mu %in% mu.set & means.df.200$env %in% env.set & means.df.200$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("DUI, Npop = 200")
-  
-  g.sub.hetpen.0 = ggplot(means.df.hetpen[means.df.hetpen$mu %in% mu.set & means.df.hetpen$env %in% env.set & means.df.hetpen$DUI == 0,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("h penalty")
-  g.sub.hetpen.1 = ggplot(means.df.hetpen[means.df.hetpen$mu %in% mu.set & means.df.hetpen$env %in% env.set & means.df.hetpen$DUI == 1,], aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
-    scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)) +
-    scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = 1), breaks=c(10, 20, 50, 100, 200, 500)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Leakage", y = "nDNA", fill = "Mean\nfitness") +
-    scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.5, 0), limits=c(0,1)) +
-    arrangement + ggtitle("DUI, h penalty")
+  g.sub.hetpen.0 = ggplot(pull.set(means.df.hetpen)) + g.format + ggtitle("h penalty")
+  g.sub.hetpen.1 = ggplot(pull.set(means.df.hetpen, DUI=1)) + g.format + ggtitle("DUI, h penalty")
   
   nl = theme(legend.position = "none")
   sf = 2

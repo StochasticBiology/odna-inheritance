@@ -62,141 +62,161 @@ fi
 
 if [[ $commandstr == *default* ]]; then
   # default experiment (homoplasmic ICs, stochastic leakage, stochastic reamplification)
-  ./inherit-template.ce 100 1 0 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 2 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 4 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 8 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 16 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 32 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 64 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 128 0.5 0 0 0 0 > tmp &
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0 1 1 > tmp &
 fi
 
 if [[ $commandstr == *templaterepair* ]]; then
   # default experiment with limited template repair
-  ./inherit-template.ce 100 1 0 0.5 0 0 0 0.001 > tmp &
-  ./inherit-template.ce 100 1 2 0.5 0 0 0 0.001 > tmp &
-  ./inherit-template.ce 100 1 4 0.5 0 0 0 0.001 > tmp &
-  ./inherit-template.ce 100 1 8 0.5 0 0 0 0.001 > tmp &
-  ./inherit-template.ce 100 1 16 0.5 0 0 0 0.001 > tmp &
-  ./inherit-template.ce 100 1 32 0.5 0 0 0 0.001 > tmp &
-  ./inherit-template.ce 100 1 64 0.5 0 0 0 0.001 > tmp &
-  ./inherit-template.ce 100 1 128 0.5 0 0 0 0.001 > tmp &
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0.001 1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0.001 1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0.001 1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0.001 1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0.001 1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0.001 1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0.001 1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0.001 1 1 > tmp &
   
   # default experiment with stronger template repair
-  ./inherit-template.ce 100 1 0 0.5 0 0 0 0.1 > tmp &
-  ./inherit-template.ce 100 1 2 0.5 0 0 0 0.1 > tmp &
-  ./inherit-template.ce 100 1 4 0.5 0 0 0 0.1 > tmp &
-  ./inherit-template.ce 100 1 8 0.5 0 0 0 0.1 > tmp &
-  ./inherit-template.ce 100 1 16 0.5 0 0 0 0.1 > tmp &
-  ./inherit-template.ce 100 1 32 0.5 0 0 0 0.1 > tmp &
-  ./inherit-template.ce 100 1 64 0.5 0 0 0 0.1 > tmp &
-  ./inherit-template.ce 100 1 128 0.5 0 0 0 0.1 > tmp &
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0.1 1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0.1 1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0.1 1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0.1 1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0.1 1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0.1 1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0.1 1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0.1 1 1 > tmp &
 fi
 
 if [[ $commandstr == *popnsize* ]]; then
   # smaller population size
-  ./inherit-template.ce 50 1 0 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 50 1 2 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 50 1 4 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 50 1 8 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 50 1 16 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 50 1 32 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 50 1 64 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 50 1 128 0.5 0 0 0 0 > tmp &
+  ./inherit-template.ce 50 1 0 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 50 1 2 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 50 1 4 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 50 1 8 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 50 1 16 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 50 1 32 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 50 1 64 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 50 1 128 0.5 0 0 0 0 1 1 > tmp &
   
   # larger population size
-  ./inherit-template.ce 200 1 0 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 200 1 2 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 200 1 4 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 200 1 8 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 200 1 16 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 200 1 32 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 200 1 64 0.5 0 0 0 0 > tmp &
-  ./inherit-template.ce 200 1 128 0.5 0 0 0 0 > tmp &
+  ./inherit-template.ce 200 1 0 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 200 1 2 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 200 1 4 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 200 1 8 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 200 1 16 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 200 1 32 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 200 1 64 0.5 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 200 1 128 0.5 0 0 0 0 1 1 > tmp &
 fi
 
 if [[ $commandstr == *hetpenalty* ]]; then
   # heteroplasmy penalty
-  ./inherit-template.ce 100 1 0 0.5 0.05 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 2 0.5 0.05 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 4 0.5 0.05 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 8 0.5 0.05 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 16 0.5 0.05 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 32 0.5 0.05 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 64 0.5 0.05 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 128 0.5 0.05 0 0 0 > tmp &
+  ./inherit-template.ce 100 1 0 0.5 0.05 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0.05 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0.05 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0.05 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0.05 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0.05 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0.05 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0.05 0 0 0 1 1 > tmp &
   
   # bigger heteroplasmy penalty 
-  ./inherit-template.ce 100 1 0 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 2 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 4 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 8 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 16 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 32 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 64 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 128 0.5 0.25 0 0 0 > tmp &
+  ./inherit-template.ce 100 1 0 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0.25 0 0 0 1 1 > tmp &
 fi
 
 if [[ $commandstr == *bigger* ]]; then
   # bigger heteroplasmy penalty, bigger population 
-  ./inherit-template.ce 500 1 0 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 500 1 2 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 500 1 4 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 500 1 8 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 500 1 16 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 500 1 32 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 500 1 64 0.5 0.25 0 0 0 > tmp &
-  ./inherit-template.ce 500 1 128 0.5 0.25 0 0 0 > tmp &
+  ./inherit-template.ce 500 1 0 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 500 1 2 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 500 1 4 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 500 1 8 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 500 1 16 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 500 1 32 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 500 1 64 0.5 0.25 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 500 1 128 0.5 0.25 0 0 0 1 1 > tmp &
 fi
 
 if [[ $commandstr == *fitnessdiffs* ]]; then
   # more comparable mitotype fitness
-  ./inherit-template.ce 100 1 0 0.9 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 2 0.9 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 4 0.9 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 8 0.9 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 16 0.9 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 32 0.9 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 64 0.9 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 128 0.9 0 0 0 0 > tmp &
+  ./inherit-template.ce 100 1 0 0.9 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.9 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.9 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.9 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.9 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.9 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.9 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.9 0 0 0 0 1 1 > tmp &
   
   # more distinct mitotype fitness
-  ./inherit-template.ce 100 1 0 0.1 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 2 0.1 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 4 0.1 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 8 0.1 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 16 0.1 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 32 0.1 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 64 0.1 0 0 0 0 > tmp &
-  ./inherit-template.ce 100 1 128 0.1 0 0 0 0 > tmp &
+  ./inherit-template.ce 100 1 0 0.1 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.1 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.1 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.1 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.1 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.1 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.1 0 0 0 0 1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.1 0 0 0 0 1 1 > tmp &
 fi
 
 ### post review
 # evolutionary experiment -- organisms can have different strategies, which ones are evolutionarily stable when competed under different conditions?
 if [[ $commandstr == *competition* ]]; then
   gcc -o3 inherit-comp.c -lm -o inherit-comp.ce
-  ./inherit-comp.ce 100 0 0 0 1
+  ./inherit-comp.ce 1000 0. 0 0 1 0 > tmp &
+  ./inherit-comp.ce 1000 0.5 0 0 1 0 > tmp &
+  ./inherit-comp.ce 1000 0.9 0 0 1 0 > tmp &
 fi
 
 # organelle alleles have different amplification rates (within-organism selection)
 if [[ $commandstr == *multilevel* ]]; then
-gcc -o3 inherit-update.c -lm -o inherit-update.ce
-  ./inherit-update.ce 100 1 0 0.5 0 0 0 0 0.75 > tmp &
-  ./inherit-update.ce 100 1 2 0.5 0 0 0 0 0.75 > tmp &
-  ./inherit-update.ce 100 1 4 0.5 0 0 0 0 0.75 > tmp &
-  ./inherit-update.ce 100 1 8 0.5 0 0 0 0 0.75 > tmp &
-  ./inherit-update.ce 100 1 16 0.5 0 0 0 0 0.75 > tmp &
-  ./inherit-update.ce 100 1 32 0.5 0 0 0 0 0.75 > tmp &
-  ./inherit-update.ce 100 1 64 0.5 0 0 0 0 0.75 > tmp &
-  ./inherit-update.ce 100 1 128 0.5 0 0 0 0 0.75 > tmp &
+gcc -o3 inherit-template.c -lm -o inherit-template.ce
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0 0.91 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0 0.91 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0 0.91 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0 0.91 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0 0.91 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0 0.91 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0 0.91 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0 0.91 1 > tmp &
 
-  ./inherit-update.ce 100 1 0 0.5 0 0 0 0 1.5 > tmp &
-  ./inherit-update.ce 100 1 2 0.5 0 0 0 0 1.5 > tmp &
-  ./inherit-update.ce 100 1 4 0.5 0 0 0 0 1.5 > tmp &
-  ./inherit-update.ce 100 1 8 0.5 0 0 0 0 1.5 > tmp &
-  ./inherit-update.ce 100 1 16 0.5 0 0 0 0 1.5 > tmp &
-  ./inherit-update.ce 100 1 32 0.5 0 0 0 0 1.5 > tmp &
-  ./inherit-update.ce 100 1 64 0.5 0 0 0 0 1.5 > tmp &
-  ./inherit-update.ce 100 1 128 0.5 0 0 0 0 1.5 > tmp &
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0 1.1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0 1.1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0 1.1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0 1.1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0 1.1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0 1.1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0 1.1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0 1.1 1 > tmp &
+
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0 1 0.91 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0 1 0.91 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0 1 0.91 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0 1 0.91 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0 1 0.91 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0 1 0.91 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0 1 0.91 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0 1 0.91 > tmp &
+
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0 1 1.1 > tmp &
 fi
