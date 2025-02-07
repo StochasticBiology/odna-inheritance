@@ -28,14 +28,17 @@ The options are:
 * `hetpenalty`      -- different heteroplasmy penalties
 * `bigger`          -- heteroplasmy penalty with large population
 * `fitnessdiffs`    -- different fitness differences between alleles
+* `competition`     -- evolutionary competition between strategies
+* `multilevel`      -- within-organism selective differences
+* `mlrep`           -- mutant advantage + template repair
 
 `timeseries` takes a few seconds; each of the others will probably take several dozen core-days (each runs one or more sets of about ten parallel simulations, most of which take several hours or so).
 
-Following the simulation code, `plot-template.R` plots everything and performs some statistical analysis.
+Following the simulation code, `plot-template.R` plots most of the figures and performs some statistical analysis; `plot-comp.R` plots summary outputs of the evolutionary competition experiments.
 
 Details
 ----
 
-`inherit-old.c` takes coarse-grained steps through param space for different model variants; `inherit-template.c` takes finer steps, and `inherit-template-ts.c` records specific time series behaviour. 
+`inherit-old.c` takes coarse-grained steps through param space for different model variants; `inherit-template.c` takes finer steps, and `inherit-template-ts.c` records specific time series behaviour. `inherit-comp.c` and `inherit-comp-single.c` run the competition experiments where different strategies evolve together, respectively for a repeatedly-switching and once-switching environmental change regime.
 
 Some legacy code is included due to the history of the project: `Inheritance_algorithm.py` is Python code for the same type of simulation, but works rather more slowly. `Inherit_comparison.py` is this code looking at a subset of parameter space, for comparison with the C code. 
