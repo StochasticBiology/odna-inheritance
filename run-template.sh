@@ -14,6 +14,7 @@
 # fitnessdiffs    -- different fitness differences between alleles
 # competition     -- evolutionary competition between strategies*
 # multilevel      -- within-organism selective differences*
+# mlrep           -- mutant advantage + template repair*
 
 # * introduced following peer review
 
@@ -176,9 +177,15 @@ fi
 # evolutionary experiment -- organisms can have different strategies, which ones are evolutionarily stable when competed under different conditions?
 if [[ $commandstr == *competition* ]]; then
   gcc -o3 inherit-comp.c -lm -o inherit-comp.ce
-  ./inherit-comp.ce 1000 0. 0 0 1 0 > tmp &
-  ./inherit-comp.ce 1000 0.5 0 0 1 0 > tmp &
-  ./inherit-comp.ce 1000 0.9 0 0 1 0 > tmp &
+#  ./inherit-comp.ce 1000 0. 0 0 1 1 0 > tmp &
+  #  ./inherit-comp.ce 1000 0.5 0 0 1 1 0 > tmp &
+  ./inherit-comp.ce 100 0.9 0 0 1 1 0 > tmp &
+  ./inherit-comp.ce 1000 0.9 0 0 1 1 0 > tmp &
+  gcc -o3 inherit-comp-single.c -lm -o inherit-comp-single.ce
+#  ./inherit-comp.ce 1000 0. 0 0 1 1 0 > tmp &
+  #  ./inherit-comp.ce 1000 0.5 0 0 1 1 0 > tmp &
+  ./inherit-comp-single.ce 100 0.9 0 0 1 1 0 > tmp &
+  ./inherit-comp-single.ce 1000 0.9 0 0 1 1 0 > tmp &
 fi
 
 # organelle alleles have different amplification rates (within-organism selection)
@@ -219,4 +226,16 @@ gcc -o3 inherit-template.c -lm -o inherit-template.ce
   ./inherit-template.ce 100 1 32 0.5 0 0 0 0 1 1.1 > tmp &
   ./inherit-template.ce 100 1 64 0.5 0 0 0 0 1 1.1 > tmp &
   ./inherit-template.ce 100 1 128 0.5 0 0 0 0 1 1.1 > tmp &
+fi
+
+# organelle alleles have different amplification rates (within-organism selection)
+if [[ $commandstr == *mlrep* ]]; then
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0.001 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0.001 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0.001 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0.001 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0.001 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0.001 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0.001 1 1.1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0.001 1 1.1 > tmp &
 fi
