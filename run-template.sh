@@ -241,22 +241,22 @@ fi
 
 if [[ $commandstr == *cluster* ]]; then
   # inherit pairs
-  ./inherit-template.ce 50 1 0 0.5 0 0 0 0 1 1 2 > tmp &
-  ./inherit-template.ce 50 1 2 0.5 0 0 0 0 1 1 2 > tmp &
-  ./inherit-template.ce 50 1 4 0.5 0 0 0 0 1 1 2 > tmp &
-  ./inherit-template.ce 50 1 8 0.5 0 0 0 0 1 1 2 > tmp &
-  ./inherit-template.ce 50 1 16 0.5 0 0 0 0 1 1 2 > tmp &
-  ./inherit-template.ce 50 1 32 0.5 0 0 0 0 1 1 2 > tmp &
-  ./inherit-template.ce 50 1 64 0.5 0 0 0 0 1 1 2 > tmp &
-  ./inherit-template.ce 50 1 128 0.5 0 0 0 0 1 1 2 > tmp &
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0 1 1 2 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0 1 1 2 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0 1 1 2 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0 1 1 2 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0 1 1 2 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0 1 1 2 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0 1 1 2 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0 1 1 2 > tmp &
   
   # inherit clusters
-  ./inherit-template.ce 200 1 0 0.5 0 0 0 0 1 1 10 > tmp &
-  ./inherit-template.ce 200 1 2 0.5 0 0 0 0 1 1 10 > tmp &
-  ./inherit-template.ce 200 1 4 0.5 0 0 0 0 1 1 10 > tmp &
-  ./inherit-template.ce 200 1 8 0.5 0 0 0 0 1 1 10 > tmp &
-  ./inherit-template.ce 200 1 16 0.5 0 0 0 0 1 1 10 > tmp &
-  ./inherit-template.ce 200 1 32 0.5 0 0 0 0 1 1 10 > tmp &
-  ./inherit-template.ce 200 1 64 0.5 0 0 0 0 1 1 10 > tmp &
-  ./inherit-template.ce 200 1 128 0.5 0 0 0 0 1 1 10 > tmp &
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 0 1 1 10 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 0 1 1 10 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 0 1 1 10 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 0 1 1 10 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 0 1 1 10 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 0 1 1 10 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 0 1 1 10 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 0 1 1 10 > tmp &
 fi

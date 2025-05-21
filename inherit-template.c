@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
 				if(TEMPLATE > 0)
 				  {
 				    ntemplates = binomial(newI[i].a+newI[i].b+newI[i].c, TEMPLATE);
-				    for(i = 0; i < ntemplates; i++)
+				    for(j = 0; j < ntemplates; j++)
 				      {
 					da = db = dc = 0;
 					pa = (double)newI[i].a / (newI[i].a + newI[i].b + newI[i].c);
