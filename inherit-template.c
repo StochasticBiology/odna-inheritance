@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
   double TEMPLATE, FITNESSB, FITNESSC;
   int CLUSTER;
   int arep, brep, crep;
+  int ntemplates;
   
   if(argc != 12) {
     printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp, deterministic leakage, templating rate, rel int fitness of B allele, rel int fitness of C allele, cluster size\n");
@@ -137,11 +138,11 @@ int main(int argc, char *argv[])
 	  {
 	    // loop over doubly-uniparental inheritance
 	    for(DUI = 0; DUI <= 1; DUI++)
-	    {
-	      // loop over paternal leakage
-	      for(LEAKAGE = 0; LEAKAGE <= 0.52; LEAKAGE *= 2)
-		{
-		  // loop over instances for each parameterisation
+	      {
+		// loop over paternal leakage
+		for(LEAKAGE = 0; LEAKAGE <= 0.52; LEAKAGE *= 2)
+		  {
+		    // loop over instances for each parameterisation
 		    for(expt = 0; expt < NSAMP; expt++)
 		      {
 			// initialise population. every even-index individual has NDNA a; every odd-index individual has NDNA b
@@ -257,42 +258,41 @@ int main(int argc, char *argv[])
 				    newI[i].b = CLUSTER*binomial(round((double)I[dad].b/CLUSTER), LEAKAGE*0.5) + CLUSTER*binomial(round((double)I[mum].b/CLUSTER), (1.-LEAKAGE)*0.5);
 				    newI[i].c = CLUSTER*binomial(round((double)I[dad].c/CLUSTER), LEAKAGE*0.5) + CLUSTER*binomial(round((double)I[mum].c/CLUSTER), (1.-LEAKAGE)*0.5);
 				  }
-				}
-			      }while(newI[i].a + newI[i].b + newI[i].c == 0);
+				}while(newI[i].a + newI[i].b + newI[i].c == 0);
 				
-			    // apply mutations from binomial draws with mean a*MU, b*MU
-			    if(MU > 0)
-			      {
-				amu = binomial(newI[i].a, MU);
-				bmu = binomial(newI[i].b, MU);
-				newI[i].a -= amu; newI[i].c += amu;
-				newI[i].b -= bmu; newI[i].c += bmu;
-			      }
-
-			    // templated repair
-			    if(TEMPLATE > 0)
-			      {
-				ntemplates = binomial(newI[i].a+newI[i].b+newI[i].c, TEMPLATE);
-				for(i = 0; i < ntemplates; i++)
+				// apply mutations from binomial draws with mean a*MU, b*MU
+				if(MU > 0)
 				  {
-				    da = db = dc = 0;
-				    pa = (double)newI[i].a / (newI[i].a + newI[i].b + newI[i].c);
-				    pb = (double)newI[i].b / (newI[i].a + newI[i].b + newI[i].c);
-				    r1 = RND; r2 = RND;
-				    if(r1 < pa) type1 = 1;
-				    else if(r2 < pa+pb) type1 = 2;
-				    else type1 = 3;
-				    if(r2 < pa) type2 = 1;
-				    else if(r2 < pa+pb) type2 = 2;
-				    else type2 = 3;
-				    if(type1 == 1) { if(type2 == 2) { da++; db--; } if(type2 == 3) { da++; dc--; } }
-				    if(type1 == 2) { if(type2 == 1) { db++; da--; } if(type2 == 3) { db++; dc--; } }
-				    if(type1 == 3) { if(type2 == 1) { dc++; da--; } if(type2 == 2) { dc++; db--; } }
-				    newI[i].a += da; newI[i].b += db; newI[i].c += dc;
+				    amu = binomial(newI[i].a, MU);
+				    bmu = binomial(newI[i].b, MU);
+				    newI[i].a -= amu; newI[i].c += amu;
+				    newI[i].b -= bmu; newI[i].c += bmu;
 				  }
-			      }
+
+				// templated repair
+				if(TEMPLATE > 0)
+				  {
+				    ntemplates = binomial(newI[i].a+newI[i].b+newI[i].c, TEMPLATE);
+				    for(i = 0; i < ntemplates; i++)
+				      {
+					da = db = dc = 0;
+					pa = (double)newI[i].a / (newI[i].a + newI[i].b + newI[i].c);
+					pb = (double)newI[i].b / (newI[i].a + newI[i].b + newI[i].c);
+					r1 = RND; r2 = RND;
+					if(r1 < pa) type1 = 1;
+					else if(r2 < pa+pb) type1 = 2;
+					else type1 = 3;
+					if(r2 < pa) type2 = 1;
+					else if(r2 < pa+pb) type2 = 2;
+					else type2 = 3;
+					if(type1 == 1) { if(type2 == 2) { da++; db--; } if(type2 == 3) { da++; dc--; } }
+					if(type1 == 2) { if(type2 == 1) { db++; da--; } if(type2 == 3) { db++; dc--; } }
+					if(type1 == 3) { if(type2 == 1) { dc++; da--; } if(type2 == 2) { dc++; db--; } }
+					newI[i].a += da; newI[i].b += db; newI[i].c += dc;
+				      }
+				  }
 				
-			    // deterministic reamplification
+				// deterministic reamplification
 				if(DET_REAMP)
 				  {
 				    newI[i].a *= 2; newI[i].b *= 2; newI[i].c *= 2;
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
 			      }
 			  }
 #ifdef _CHANGEOUTPUT
-		    fprintf(fpc, "%i,%i,%f,%f,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC, env, NDNA, MU, DUI, LEAKAGE, CLUSTER, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
+			fprintf(fpc, "%i,%i,%f,%f,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC, env, NDNA, MU, DUI, LEAKAGE, CLUSTER, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
 #endif
 		    
 		      }
