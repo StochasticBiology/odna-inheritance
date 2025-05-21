@@ -78,7 +78,8 @@ int main(int argc, char *argv[])
   int expt;
   double amu, bmu;
   int change;
-  double pa, pb, r;
+  double pa, pb, r, r1, r2;
+  int da, db, dc, type1, type2;
   double meanf, varf, meanh;
   char fstr[100];
   double scale, penalty;
@@ -87,10 +88,11 @@ int main(int argc, char *argv[])
   double meanw, meanwnorm;
   int ICs, DET_REAMP, DET_LEAK;
   double TEMPLATE, FITNESSB, FITNESSC;
+  int CLUSTER;
   int arep, brep, crep;
   
-  if(argc != 11) {
-    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp, deterministic leakage, templating rate, rel int fitness of B allele, rel int fitness of C allele\n");
+  if(argc != 12) {
+    printf("Please specify Npop, initial conditions, environmental change period, fitness scale, heteroplasmy penalty, deterministic reamp, deterministic leakage, templating rate, rel int fitness of B allele, rel int fitness of C allele, cluster size\n");
     exit(0);
   }
   NPOP = atoi(argv[1]);
@@ -103,24 +105,25 @@ int main(int argc, char *argv[])
   TEMPLATE = atof(argv[8]);
   FITNESSB = atof(argv[9]);
   FITNESSC = atof(argv[10]);
+  CLUSTER = atoi(argv[11]);
   
   // open file for output
 #ifdef _FULLOUTPUT
-  sprintf(fstr, "inherit-template-full-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC);
+  sprintf(fstr, "inherit-template-full-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC, CLUSTER);
   fp = fopen(fstr, "w");
-  fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,expt,t,i,a,b,c,f\n");
+  fprintf(fp, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,cluster,expt,t,i,a,b,c,f\n");
 #endif
 
 #ifdef _MEANOUTPUT
-  sprintf(fstr, "inherit-template-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC);
+  sprintf(fstr, "inherit-template-mean-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC, CLUSTER);
   fpm = fopen(fstr, "w");
-  fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,expt,t,mean.f,var.f,mean.h\n");
+  fprintf(fpm, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,cluster,expt,t,mean.f,var.f,mean.h\n");
 #endif
 
 #ifdef _CHANGEOUTPUT
-  sprintf(fstr, "inherit-template-change-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC);
+  sprintf(fstr, "inherit-template-change-out-%i-%i-%i-%.3f-%.3f-%i-%i-%.5f-%.2f-%.2f-%i.csv", NPOP, ICs, env, scale, penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC, CLUSTER);
   fpc = fopen(fstr, "w");
-  fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,expt,end.mean.f,end.mean.h,window.mean.f\n");
+  fprintf(fpc, "Npop,ICs,scale,penalty,det.reamp,det.leak,template,fitness.b,fitness.c,env,nDNA,mu,DUI,leakage,cluster,expt,end.mean.f,end.mean.h,window.mean.f\n");
 #endif
 
   // loop over different environment types
@@ -218,7 +221,7 @@ int main(int argc, char *argv[])
 			      {
 				if(t == 10 || t == 100 || t == 500 || t == 900)
 				  {
-				    fprintf(fp, "%i,%i,%f,%f,%i,%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESS, env, NDNA, MU, DUI, LEAKAGE, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
+				    fprintf(fp, "%i,%i,%f,%f,%i,%i,%f,%f,%i,%i,%f,%i,%f,%i,%i,%i,%i,%i,%i,%i,%f\n", NPOP, ICs, scale,penalty, DET_REAMP, DET_LEAK, TEMPLATE, FITNESS, env, NDNA, MU, DUI, LEAKAGE, CLUSTER, expt, t, i, I[i].a, I[i].b, I[i].c, f[i]);
 				  }
 			      }
 #endif
@@ -246,38 +249,50 @@ int main(int argc, char *argv[])
 				// construct new individual's genetic makeup from binomial draws with mean (1-leak)*mother + leak*father
 				do{
 				  if(DET_LEAK) {
-				    newI[i].a = round(LEAKAGE*binomial(I[dad].a, 0.5) + (1.-LEAKAGE)*binomial(I[mum].a, 0.5));
-				    newI[i].b = round(LEAKAGE*binomial(I[dad].b, 0.5) + (1.-LEAKAGE)*binomial(I[mum].b, 0.5));
-				    newI[i].c = round(LEAKAGE*binomial(I[dad].c, 0.5) + (1.-LEAKAGE)*binomial(I[mum].c, 0.5));
+				    newI[i].a = CLUSTER*round(LEAKAGE*binomial(round((double)I[dad].a/CLUSTER), 0.5) + CLUSTER*(1.-LEAKAGE)*binomial(round((double)I[mum].a/CLUSTER), 0.5));
+				    newI[i].a = CLUSTER*round(LEAKAGE*binomial(round((double)I[dad].b/CLUSTER), 0.5) + CLUSTER*(1.-LEAKAGE)*binomial(round((double)I[mum].b/CLUSTER), 0.5));
+				    newI[i].a = CLUSTER*round(LEAKAGE*binomial(round((double)I[dad].c/CLUSTER), 0.5) + CLUSTER*(1.-LEAKAGE)*binomial(round((double)I[mum].c/CLUSTER), 0.5));
 				  } else {
-				    newI[i].a = binomial(I[dad].a, LEAKAGE*0.5) + binomial(I[mum].a, (1.-LEAKAGE)*0.5);
-				    newI[i].b = binomial(I[dad].b, LEAKAGE*0.5) + binomial(I[mum].b, (1.-LEAKAGE)*0.5);
-				    newI[i].c = binomial(I[dad].c, LEAKAGE*0.5) + binomial(I[mum].c, (1.-LEAKAGE)*0.5);
+				    newI[i].a = CLUSTER*binomial(round((double)I[dad].a/CLUSTER), LEAKAGE*0.5) + CLUSTER*binomial(round((double)I[mum].a/CLUSTER), (1.-LEAKAGE)*0.5);
+				    newI[i].b = CLUSTER*binomial(round((double)I[dad].b/CLUSTER), LEAKAGE*0.5) + CLUSTER*binomial(round((double)I[mum].b/CLUSTER), (1.-LEAKAGE)*0.5);
+				    newI[i].c = CLUSTER*binomial(round((double)I[dad].c/CLUSTER), LEAKAGE*0.5) + CLUSTER*binomial(round((double)I[mum].c/CLUSTER), (1.-LEAKAGE)*0.5);
 				  }
-				}while(newI[i].a + newI[i].b + newI[i].c == 0);
+				}
+			      }while(newI[i].a + newI[i].b + newI[i].c == 0);
 				
-				// apply mutations from binomial draws with mean a*MU, b*MU
-				if(MU > 0)
-				  {
-				    amu = binomial(newI[i].a, MU);
-				    bmu = binomial(newI[i].b, MU);
-				    newI[i].a -= amu; newI[i].c += amu;
-				    newI[i].b -= bmu; newI[i].c += bmu;
-				  }
+			    // apply mutations from binomial draws with mean a*MU, b*MU
+			    if(MU > 0)
+			      {
+				amu = binomial(newI[i].a, MU);
+				bmu = binomial(newI[i].b, MU);
+				newI[i].a -= amu; newI[i].c += amu;
+				newI[i].b -= bmu; newI[i].c += bmu;
+			      }
 
-				// templated repair
-				if(TEMPLATE > 0)
+			    // templated repair
+			    if(TEMPLATE > 0)
+			      {
+				ntemplates = binomial(newI[i].a+newI[i].b+newI[i].c, TEMPLATE);
+				for(i = 0; i < ntemplates; i++)
 				  {
-				    // decide how many mutants get template-repaired overall
-				    crep = binomial(newI[i].c, TEMPLATE*(newI[i].a+newI[i].b));
-				    // decide how many were templated from type a
-				    arep = binomial(crep, (double)(newI[i].a)/(newI[i].a+newI[i].b));
-				    brep = crep-arep;
-				    newI[i].a += arep; newI[i].b += brep;
-				    newI[i].c -= crep;
+				    da = db = dc = 0;
+				    pa = (double)newI[i].a / (newI[i].a + newI[i].b + newI[i].c);
+				    pb = (double)newI[i].b / (newI[i].a + newI[i].b + newI[i].c);
+				    r1 = RND; r2 = RND;
+				    if(r1 < pa) type1 = 1;
+				    else if(r2 < pa+pb) type1 = 2;
+				    else type1 = 3;
+				    if(r2 < pa) type2 = 1;
+				    else if(r2 < pa+pb) type2 = 2;
+				    else type2 = 3;
+				    if(type1 == 1) { if(type2 == 2) { da++; db--; } if(type2 == 3) { da++; dc--; } }
+				    if(type1 == 2) { if(type2 == 1) { db++; da--; } if(type2 == 3) { db++; dc--; } }
+				    if(type1 == 3) { if(type2 == 1) { dc++; da--; } if(type2 == 2) { dc++; db--; } }
+				    newI[i].a += da; newI[i].b += db; newI[i].c += dc;
 				  }
+			      }
 				
-				// deterministic reamplification
+			    // deterministic reamplification
 				if(DET_REAMP)
 				  {
 				    newI[i].a *= 2; newI[i].b *= 2; newI[i].c *= 2;
@@ -309,7 +324,7 @@ int main(int argc, char *argv[])
 			      }
 			  }
 #ifdef _CHANGEOUTPUT
-			fprintf(fpc, "%i,%i,%f,%f,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC, env, NDNA, MU, DUI, LEAKAGE, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
+		    fprintf(fpc, "%i,%i,%f,%f,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%i,%i,%f,%f,%f\n", NPOP, ICs, scale,penalty,DET_REAMP, DET_LEAK, TEMPLATE, FITNESSB, FITNESSC, env, NDNA, MU, DUI, LEAKAGE, CLUSTER, expt,  meanmean/meannorm, meanmeanh/meannorm, meanw/meanwnorm);
 #endif
 		    
 		      }
