@@ -5,8 +5,14 @@ library(dplyr)
 library(metR)
 library(ggpubr)
 
+src.dir.1 = "~/Dropbox/Documents/2024_Projects/Belen/Curate"
+src.dir.2 = "~/Dropbox/Documents/2025_Projects/Belen/odna-inheritance-main 4/"
+src.dir.3 = "~/Dropbox/Documents/2025_Projects/Belen/"
+dest.dir = "~/Dropbox/Documents/2025_Projects/Belen/Output"
+
 # time series demonstrations
 
+setwd(src.dir.1)
 df1 = read.csv("inherit-template-full-out-10-1-0-0.500-0.000-0-0-0.00000.csv")
 expt.1 = df1[df1$t < 50,]
 
@@ -28,14 +34,14 @@ dyn.sum.plot = function(plot.set, tau, tstr) {
                      aes(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax), fill="#8888FF", alpha=0.4) +
            geom_rect(data=data.frame(xmin=tau,ymin=0,xmax=35,ymax=50), 
                      aes(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax), fill="#FF8888", alpha=0.4) +
-    geom_line(data=means.1, aes(x=t, y=mean_a), color="blue", linewidth=2) +
-    geom_line(data=means.1, aes(x=t, y=mean_b), color="red", linewidth=2) +
-    geom_line(data=means.1, aes(x=t, y=mean_c), color="grey", linewidth=2) +
+    geom_line(data=means.1, aes(x=t, y=mean_a), color="#8888FF", linewidth=1) +
+    geom_line(data=means.1, aes(x=t, y=mean_b), color="red", linewidth=1) +
+    geom_line(data=means.1, aes(x=t, y=mean_c), color="#666666", linewidth=1) +
      
-    geom_point(data=plot.set, aes(x=t, y=a), color="blue", size=2, alpha=0.5) +
+    geom_point(data=plot.set, aes(x=t, y=a), color="#8888FF", size=2, alpha=0.5) +
     geom_point(data=plot.set, aes(x=t+0.3, y=b), color="red", size=2, alpha=0.5) +
-    geom_point(data=plot.set, aes(x=t+0.6, y=c), color="grey", size=2, alpha=0.5) +
-      geom_line(data=means.1, aes(x=t, y=mean_f), color="black", linewidth=2) +
+    geom_point(data=plot.set[plot.set$c != 0,], aes(x=t+0.6, y=c), color="#666666", size=2, alpha=0.5) +
+      geom_line(data=means.1, aes(x=t, y=mean_f), color="black", linewidth=1) +
       labs(x="t", y="Counts and fitness") +
       xlim(0,35) +
       ggtitle(tstr) +
@@ -44,7 +50,7 @@ dyn.sum.plot = function(plot.set, tau, tstr) {
   
 }
 
-
+setwd(dest.dir)
 # output a given set of example trajectories
 sf =2
 png("ex-time-series.png", width=600*sf, height=400*sf, res=72*sf)
@@ -57,7 +63,7 @@ ggarrange(
 )
 dev.off()
 
-
+setwd(src.dir.1)
 # explore effects of different model protocols 
 mdf = data.frame()
 for(env in c(0, 10)) {
@@ -132,6 +138,7 @@ g.env.10.dui = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
   #  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
   facet_wrap(~label)
 
+setwd(dest.dir)
 sf = 2
 png("si-different-models.png", width=600*sf, height=600*sf, res=72*sf)
 ggarrange(g.env.0, g.env.10, 
@@ -157,11 +164,22 @@ ggplot(means.df[means.df$env==10,]) +
 
 # general function to read in data output
 read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5, 
-                         penalty = 0, TEMPLATE = 0, FITNESSB = 1, FITNESSC = 1) {
+                         penalty = 0, TEMPLATE = 0, FITNESSB = 1, FITNESSC = 1, CLUSTER = 1,
+                         code.ver = 1) {
   mdf = data.frame()
   for(env in c(0, 2**(1:7))) {
-    tdf = read.csv(sprintf("inherit-template-change-out-%i-%i-%i-%.3f-%.3f-0-0-%.5f-%.2f-%.2f.csv", 
-                           NPOP, ICs, env, scale, penalty, TEMPLATE, FITNESSB, FITNESSC))
+  if(code.ver == 1) {
+    fname = sprintf("inherit-template-change-out-%i-%i-%i-%.3f-%.3f-0-0-%.5f.csv", 
+            NPOP, ICs, env, scale, penalty, TEMPLATE)
+  } else if(code.ver ==2) {
+    fname = sprintf("inherit-template-change-out-%i-%i-%i-%.3f-%.3f-0-0-%.5f-%.2f-%.2f-%i.csv", 
+            NPOP, ICs, env, scale, penalty, TEMPLATE, FITNESSB, FITNESSC, CLUSTER)
+  } else {
+    fname = sprintf("inherit-template-change-out-%i-%i-%i-%.3f-%.3f-0-0-%.5f-%.2f-%.2f.csv", 
+                    NPOP, ICs, env, scale, penalty, TEMPLATE, FITNESSB, FITNESSC)
+  }
+
+    tdf = read.csv(fname)
     mdf = rbind(mdf, tdf)
   }
   return( mdf %>% 
@@ -170,31 +188,45 @@ read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5,
   )
 }
 
-## default experiment NB filename system updates
+# default experiment NB filename system updates
 
+setwd(src.dir.1)
 means.df.100 = read.datafile()
-## templated repair rate 1
-means.df.100.temp.1 = read.datafile(TEMPLATE = 0.001)
-## templated repair rate 2
-means.df.100.temp.2 = read.datafile(TEMPLATE = 0.1)
 
 ## smaller population size
 means.df.50 = read.datafile(NPOP = 50)
 ## larger population size
-means.df.200 = read.datafile(NPOP = 200)
+setwd(src.dir.3)
+means.df.200 = read.datafile(NPOP = 200, code.ver = 3)
 
 ## heteroplasmy penalty
-means.df.hetpen = read.datafile(penalty = 0.25)
+means.df.hetpen = read.datafile(penalty = 0.25, code.ver = 3)
 
 ###############
 ###### this section added after peer review: looking at different within-cell fitnesses
 
+setwd(src.dir.3)
+
 ## postivie/negative cellular fitness for B/C
-means.df.fit.neg.b = read.datafile(FITNESSB = 0.91)
-means.df.fit.pos.b = read.datafile(FITNESSB = 1.1)
-means.df.fit.neg.c = read.datafile(FITNESSC = 0.91)
-means.df.fit.pos.c = read.datafile(FITNESSC = 1.1)
-means.df.fit.pos.c.template = read.datafile(TEMPLATE = 0.001, FITNESSC = 1.1)
+means.df.fit.neg.b = read.datafile(FITNESSB = 0.91, code.ver = 3)
+means.df.fit.pos.b = read.datafile(FITNESSB = 1.1, code.ver = 3)
+means.df.fit.neg.c = read.datafile(FITNESSC = 0.91, code.ver = 3)
+means.df.fit.pos.c = read.datafile(FITNESSC = 1.1, code.ver = 3)
+#means.df.fit.pos.c.template = read.datafile(TEMPLATE = 0.001, FITNESSC = 1.1)
+
+setwd(src.dir.2)
+
+## templated repair rate 1
+means.df.100.temp.1 = read.datafile(TEMPLATE = 0.001, code.ver = 2)
+## templated repair rate 2
+means.df.100.temp.2 = read.datafile(TEMPLATE = 0.1, code.ver = 2)
+
+## templated repair rate 1
+means.df.100.dtemp.1 = read.datafile(TEMPLATE = -0.001, code.ver = 2)
+
+# different cluster sizes
+means.df.100.c2 = read.datafile(CLUSTER=2, code.ver = 2)
+means.df.100.c10 = read.datafile(CLUSTER=10, code.ver = 2)
 
 mu.set = c(0,0.0001,0.01)
 env.set = c(2, 8, 16, 64)
@@ -224,6 +256,32 @@ ggarrange(g.sub.fit.neg.b, g.sub.fit.pos.b,
 ###### end of new section
 ###############
 
+########
+# reworked template repair, and cluster inheritance
+g.set.newtemp = ggarrange(ggplot(means.df.100.temp.1[means.df.100.temp.1$DUI == 0,]) + g.format,
+          ggplot(means.df.100.temp.2[means.df.100.temp.2$DUI == 0,]) + g.format)
+
+g.set.diru.temp = ggarrange(ggplot(means.df.100[means.df.100$DUI == 0,]) + g.format,
+                            ggplot(means.df.100.temp.1[means.df.100.temp.1$DUI == 0,]) + g.format,
+                          ggplot(means.df.100.dtemp.1[means.df.100.dtemp.1$DUI == 0,]) + g.format, nrow=1)
+
+g.set.cluster = ggarrange(ggplot(means.df.100.c2[means.df.100.c2$DUI == 0,]) + g.format,
+          ggplot(means.df.100.c10[means.df.100.c10$DUI == 0,]) + g.format)
+
+setwd(dest.dir)
+sf = 2
+png("new-temp-full.png", width=1200*sf, height=1200*sf, res=72*sf)
+print(g.set.newtemp)
+dev.off()
+png("new-dtemp-full.png", width=1800*sf, height=1200*sf, res=72*sf)
+print(g.set.diru.temp)
+dev.off()
+png("new-temp-cluster.png", width=1200*sf, height=1200*sf, res=72*sf)
+print(g.set.cluster)
+dev.off()
+
+#######
+
 g.all.100.0 = ggplot(means.df.100[means.df.100$DUI == 0,]) +g.format
 
 wdf = means.df.100[means.df.100$DUI == 0,]
@@ -250,11 +308,15 @@ for(expt.detail in c(0, 1)) {
   
   g.sub.100.0 = ggplot(pull.set(means.df.100)) + g.format + ggtitle("Standard")
   g.sub.100.1 = ggplot(pull.set(means.df.100, DUI=1)) + g.format + ggtitle("DUI")
-  g.sub.100.temp.1.0 = ggplot(pull.set(means.df.100.temp.1)) + g.format + ggtitle("Templated repair")
-  g.sub.100.temp.2.0 = ggplot(pull.set(means.df.100.temp.2)) + g.format + ggtitle("Templated repair alt")
+  g.sub.100.temp.1.0 = ggplot(pull.set(means.df.100.temp.1)) + g.format + ggtitle("Undirected overwriting")
+  g.sub.100.temp.2.0 = ggplot(pull.set(means.df.100.temp.2)) + g.format + ggtitle("Undirected overwriting alt")
 
-  g.sub.100.temp.1.1 = ggplot(pull.set(means.df.100.temp.1, DUI=1)) + g.format + ggtitle("DUI, templated repair")
-
+  g.sub.100.c2 = ggplot(pull.set(means.df.100.c2)) + g.format + ggtitle("Cluster size 2")
+  g.sub.100.c10 = ggplot(pull.set(means.df.100.c10)) + g.format + ggtitle("Cluster size 10")
+  
+  g.sub.100.temp.1.1 = ggplot(pull.set(means.df.100.temp.1, DUI=1)) + g.format + ggtitle("DUI, undirected overwriting")
+  g.sub.100.dtemp.1.0 = ggplot(pull.set(means.df.100.dtemp.1, DUI=0)) + g.format + ggtitle("Directed repair")
+  
   g.sub.50.0 = ggplot(pull.set(means.df.50)) + g.format + ggtitle("Npop = 50")
   g.sub.50.1 = ggplot(pull.set(means.df.50, DUI=1)) + g.format + ggtitle("DUI, Npop = 50")
   g.sub.200.0 = ggplot(pull.set(means.df.200)) + g.format + ggtitle("Npop = 200")
@@ -267,15 +329,17 @@ for(expt.detail in c(0, 1)) {
   g.sub.fit.pos.b = ggplot(pull.set(means.df.fit.pos.b)) + g.format + ggtitle("Cell adv to B")
   g.sub.fit.neg.c = ggplot(pull.set(means.df.fit.neg.c)) + g.format + ggtitle("Cell disadv to M")
   g.sub.fit.pos.c = ggplot(pull.set(means.df.fit.pos.c)) + g.format + ggtitle("Cell adv to M")
-  g.sub.fit.pos.c.template = ggplot(pull.set(means.df.fit.pos.c.template)) + g.format + ggtitle("Cell adv to M, templated repair")
+  #g.sub.fit.pos.c.template = ggplot(pull.set(means.df.fit.pos.c.template)) + g.format + ggtitle("Cell adv to M, templated repair")
   
   nl = theme(legend.position = "none")
   sf = 2
   if(expt.detail == 0) {
     png("all-trellises-update.png", width=900*sf, height=900*sf, res=72*sf)
     print(ggarrange(g.sub.100.0+nl, g.sub.50.0+nl, g.sub.200.0+nl, 
-                    g.sub.100.1+nl, g.sub.100.temp.1.0+nl, g.sub.hetpen.0+nl, 
-                    g.sub.fit.neg.b+nl, g.sub.fit.pos.c+nl, g.sub.fit.pos.c.template+nl,
+                    g.sub.100.1+nl, g.sub.100.dtemp.1.0+nl, g.sub.hetpen.0+nl, 
+                    g.sub.fit.neg.b+nl, g.sub.fit.pos.c+nl,
+                    g.sub.100.c10+nl,
+                    # g.sub.fit.pos.c.template+nl,
                     #labels=c("A. Default", "B. Small popn", "C. Large popn", "D. DUI", "E. Repair", "F. h penalty"),
                     labels=c("A", "B", "C", "D", "E", "F", "G", "H", "I"),
                     ncol=3,nrow=3))
@@ -283,19 +347,26 @@ for(expt.detail in c(0, 1)) {
   } else {
     png("all-trellises-update-full.png", width=1200*sf, height=1200*sf, res=72*sf)
     print(ggarrange(g.sub.100.0+nl, g.sub.50.0+nl, g.sub.200.0+nl, 
-                    g.sub.100.1+nl, g.sub.100.temp.1.0+nl, g.sub.hetpen.0+nl, 
-                    g.sub.hetpen.1+nl, 
+                    g.sub.100.1+nl, 
+                    #g.sub.100.temp.1.0+nl, 
+                    g.sub.hetpen.0+nl, 
+                    g.sub.100.dtemp.1.0+nl,
+                    g.sub.100.temp.1.0+nl,
+                    #g.sub.hetpen.1+nl, 
                     g.sub.fit.neg.b+nl, g.sub.fit.pos.b+nl, g.sub.fit.neg.c+nl, g.sub.fit.pos.c+nl,
-                    g.sub.fit.pos.c.template+nl,
+                    g.sub.100.c10+nl, 
+                    
+                    
+                    #g.sub.fit.pos.c.template+nl,
 #                    labels=c("A. Default", "B. Small popn", "C. Large popn", "D. DUI", "E. Repair", "F. h penalty"),
                     labels=c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"),
                     ncol=4,nrow=3))
     dev.off()
   }
- 
 
 }
 
+setwd(dest.dir)
 png("main-text-trellis.png", width=600*sf, height=600*sf, res=72*sf)
 print(g.all.100.0 + labs(x="Leakage", y="N", fill="Mean\nfitness"))
 dev.off()

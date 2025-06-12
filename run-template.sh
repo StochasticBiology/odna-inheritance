@@ -7,7 +7,8 @@
 # default         -- default model structure
 # timeseries      -- example time series
 # altmodels       -- alternative model structures (determinism, ICs)
-# templaterepair  -- nonzero templated repair
+# templaterepair  -- nonzero undirected templated repair
+# altrepair       -- nonzero directed templated repair
 # popnsize        -- different population sizes
 # hetpenalty      -- different heteroplasmy penalties
 # bigger          -- heteroplasmy penalty with large population
@@ -92,6 +93,17 @@ if [[ $commandstr == *templaterepair* ]]; then
   ./inherit-template.ce 100 1 32 0.5 0 0 0 0.1 1 1 1 > tmp &
   ./inherit-template.ce 100 1 64 0.5 0 0 0 0.1 1 1 1 > tmp &
   ./inherit-template.ce 100 1 128 0.5 0 0 0 0.1 1 1 1 > tmp &
+fi
+
+if [[ $commandstr == *altrepair* ]]; then
+  ./inherit-template.ce 100 1 0 0.5 0 0 0 -0.001 1 1 1 > tmp &
+  ./inherit-template.ce 100 1 2 0.5 0 0 0 -0.001 1 1 1 > tmp &
+  ./inherit-template.ce 100 1 4 0.5 0 0 0 -0.001 1 1 1 > tmp &
+  ./inherit-template.ce 100 1 8 0.5 0 0 0 -0.001 1 1 1 > tmp &
+  ./inherit-template.ce 100 1 16 0.5 0 0 0 -0.001 1 1 1 > tmp &
+  ./inherit-template.ce 100 1 32 0.5 0 0 0 -0.001 1 1 1 > tmp &
+  ./inherit-template.ce 100 1 64 0.5 0 0 0 -0.001 1 1 1 > tmp &
+  ./inherit-template.ce 100 1 128 0.5 0 0 0 -0.001 1 1 1 > tmp &
 fi
 
 if [[ $commandstr == *popnsize* ]]; then

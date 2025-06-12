@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
 				    newI[i].b -= bmu; newI[i].c += bmu;
 				  }
 
-				// templated repair
+				// templated repair -- undirected
 				if(TEMPLATE > 0)
 				  {
 				    ntemplates = binomial(newI[i].a+newI[i].b+newI[i].c, TEMPLATE);
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 					pb = (double)newI[i].b / (newI[i].a + newI[i].b + newI[i].c);
 					r1 = RND; r2 = RND;
 					if(r1 < pa) type1 = 1;
-					else if(r2 < pa+pb) type1 = 2;
+					else if(r1 < pa+pb) type1 = 2;
 					else type1 = 3;
 					if(r2 < pa) type2 = 1;
 					else if(r2 < pa+pb) type2 = 2;
@@ -290,6 +290,14 @@ int main(int argc, char *argv[])
 					if(type1 == 3) { if(type2 == 1) { dc++; da--; } if(type2 == 2) { dc++; db--; } }
 					newI[i].a += da; newI[i].b += db; newI[i].c += dc;
 				      }
+				  }
+				// templated repair -- directed
+				if(TEMPLATE < 0)
+				  {
+				    dc = -binomial(newI[i].c, -TEMPLATE*(newI[i].a + newI[i].b));
+				    da = binomial(-dc, (double)newI[i].a / (newI[i].a + newI[i].b));
+				    db = -dc - da;
+				    newI[i].a += da; newI[i].b += db; newI[i].c += dc;
 				  }
 				
 				// deterministic reamplification
