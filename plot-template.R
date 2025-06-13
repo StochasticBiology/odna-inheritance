@@ -5,14 +5,8 @@ library(dplyr)
 library(metR)
 library(ggpubr)
 
-src.dir.1 = "~/Dropbox/Documents/2024_Projects/Belen/Curate"
-src.dir.2 = "~/Dropbox/Documents/2025_Projects/Belen/odna-inheritance-main 4/"
-src.dir.3 = "~/Dropbox/Documents/2025_Projects/Belen/"
-dest.dir = "~/Dropbox/Documents/2025_Projects/Belen/Output"
-
 # time series demonstrations
 
-setwd(src.dir.1)
 df1 = read.csv("inherit-template-full-out-10-1-0-0.500-0.000-0-0-0.00000.csv")
 expt.1 = df1[df1$t < 50,]
 
@@ -50,7 +44,6 @@ dyn.sum.plot = function(plot.set, tau, tstr) {
   
 }
 
-setwd(dest.dir)
 # output a given set of example trajectories
 sf =2
 png("ex-time-series.png", width=600*sf, height=400*sf, res=72*sf)
@@ -63,7 +56,6 @@ ggarrange(
 )
 dev.off()
 
-setwd(src.dir.1)
 # explore effects of different model protocols 
 mdf = data.frame()
 for(env in c(0, 10)) {
@@ -138,7 +130,6 @@ g.env.10.dui = ggplot(sub, aes(x=leakage, y=nDNA, fill=mean_f)) + geom_tile() +
   #  facet_wrap(~expt.label(ICs, det.leak, det.reamp))
   facet_wrap(~label)
 
-setwd(dest.dir)
 sf = 2
 png("si-different-models.png", width=600*sf, height=600*sf, res=72*sf)
 ggarrange(g.env.0, g.env.10, 
@@ -165,7 +156,7 @@ ggplot(means.df[means.df$env==10,]) +
 # general function to read in data output
 read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5, 
                          penalty = 0, TEMPLATE = 0, FITNESSB = 1, FITNESSC = 1, CLUSTER = 1,
-                         code.ver = 1) {
+                         code.ver = 2) {
   mdf = data.frame()
   for(env in c(0, 2**(1:7))) {
   if(code.ver == 1) {
@@ -189,44 +180,38 @@ read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5,
 }
 
 # default experiment NB filename system updates
-
-setwd(src.dir.1)
 means.df.100 = read.datafile()
 
 ## smaller population size
 means.df.50 = read.datafile(NPOP = 50)
 ## larger population size
-setwd(src.dir.3)
-means.df.200 = read.datafile(NPOP = 200, code.ver = 3)
+means.df.200 = read.datafile(NPOP = 200)
 
 ## heteroplasmy penalty
-means.df.hetpen = read.datafile(penalty = 0.25, code.ver = 3)
+means.df.hetpen = read.datafile(penalty = 0.25)
 
 ###############
 ###### this section added after peer review: looking at different within-cell fitnesses
 
-setwd(src.dir.3)
-
 ## postivie/negative cellular fitness for B/C
-means.df.fit.neg.b = read.datafile(FITNESSB = 0.91, code.ver = 3)
-means.df.fit.pos.b = read.datafile(FITNESSB = 1.1, code.ver = 3)
-means.df.fit.neg.c = read.datafile(FITNESSC = 0.91, code.ver = 3)
-means.df.fit.pos.c = read.datafile(FITNESSC = 1.1, code.ver = 3)
+means.df.fit.neg.b = read.datafile(FITNESSB = 0.91)
+means.df.fit.pos.b = read.datafile(FITNESSB = 1.1)
+means.df.fit.neg.c = read.datafile(FITNESSC = 0.91)
+means.df.fit.pos.c = read.datafile(FITNESSC = 1.1)
 #means.df.fit.pos.c.template = read.datafile(TEMPLATE = 0.001, FITNESSC = 1.1)
 
-setwd(src.dir.2)
 
 ## templated repair rate 1
-means.df.100.temp.1 = read.datafile(TEMPLATE = 0.001, code.ver = 2)
+means.df.100.temp.1 = read.datafile(TEMPLATE = 0.001)
 ## templated repair rate 2
-means.df.100.temp.2 = read.datafile(TEMPLATE = 0.1, code.ver = 2)
+means.df.100.temp.2 = read.datafile(TEMPLATE = 0.1)
 
-## templated repair rate 1
-means.df.100.dtemp.1 = read.datafile(TEMPLATE = -0.001, code.ver = 2)
+## DIRECTED templated repair rate 1
+means.df.100.dtemp.1 = read.datafile(TEMPLATE = -0.001)
 
 # different cluster sizes
-means.df.100.c2 = read.datafile(CLUSTER=2, code.ver = 2)
-means.df.100.c10 = read.datafile(CLUSTER=10, code.ver = 2)
+means.df.100.c2 = read.datafile(CLUSTER=2)
+means.df.100.c10 = read.datafile(CLUSTER=10)
 
 mu.set = c(0,0.0001,0.01)
 env.set = c(2, 8, 16, 64)
@@ -268,7 +253,6 @@ g.set.diru.temp = ggarrange(ggplot(means.df.100[means.df.100$DUI == 0,]) + g.for
 g.set.cluster = ggarrange(ggplot(means.df.100.c2[means.df.100.c2$DUI == 0,]) + g.format,
           ggplot(means.df.100.c10[means.df.100.c10$DUI == 0,]) + g.format)
 
-setwd(dest.dir)
 sf = 2
 png("new-temp-full.png", width=1200*sf, height=1200*sf, res=72*sf)
 print(g.set.newtemp)
@@ -366,7 +350,6 @@ for(expt.detail in c(0, 1)) {
 
 }
 
-setwd(dest.dir)
 png("main-text-trellis.png", width=600*sf, height=600*sf, res=72*sf)
 print(g.all.100.0 + labs(x="Leakage", y="N", fill="Mean\nfitness"))
 dev.off()
