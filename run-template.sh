@@ -37,7 +37,7 @@ if [[ $commandstr == *timeseries* ]]; then
 fi
 
 # inherit-old takes coarser steps through parameter space; inherit-template finer
-# arguments: [organismal population size] [homoplasmic ICs] [env change period] [fitness of bad allele] [heteroplasmy penalty] [deterministic reamplification] [deterministic leakage] [for inherit-template, template repair rate]
+# old arguments: [organismal population size] [homoplasmic ICs] [env change period] [fitness of bad allele] [heteroplasmy penalty] [deterministic reamplification] [deterministic leakage] [for inherit-template, template repair rate]
 # output files are labelled by these arguments (and "old" in the case of inherit-old)
 
 if [[ $commandstr == *altmodels* ]]; then
@@ -61,6 +61,8 @@ if [[ $commandstr == *altmodels* ]]; then
   ./inherit-old.ce 100 1 10 0.5 0 1 1 >tmp &
 fi
 
+# inherit-template arguments:
+# [Npop] [initially homoplasmic organisms?] [environmental change period] [fitness scale] [heteroplasmy penalty] [deterministic reamp?] [deterministic leakage?] [templating rate] [rel int fitness of B allele] [rel int fitness of C allele] [cluster size]
 if [[ $commandstr == *default* ]]; then
   # default experiment (homoplasmic ICs, stochastic leakage, stochastic reamplification)
   ./inherit-template.ce 100 1 0 0.5 0 0 0 0 1 1 1 > tmp &
