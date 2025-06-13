@@ -23,7 +23,8 @@ The options are:
 * `default`         -- default model structure
 * `timeseries`      -- example time series
 * `altmodels`       -- alternative model structures (determinism, ICs)
-* `templaterepair`  -- nonzero templated repair
+* `templaterepair`  -- nonzero undirect templated repair
+* `altrepair`       -- nonzero directed templated repair
 * `popnsize`        -- different population sizes
 * `hetpenalty`      -- different heteroplasmy penalties
 * `bigger`          -- heteroplasmy penalty with large population
@@ -31,6 +32,7 @@ The options are:
 * `competition`     -- evolutionary competition between strategies
 * `multilevel`      -- within-organism selective differences
 * `mlrep`           -- mutant advantage + template repair
+* `cluster`         -- different inherited cluster sizes
 
 `timeseries` takes a few seconds; each of the others will probably take several dozen core-days (each runs one or more sets of about ten parallel simulations, most of which take several hours or so).
 
@@ -39,6 +41,20 @@ Following the simulation code, `plot-template.R` plots most of the figures and p
 Details
 ----
 
-`inherit-old.c` takes coarse-grained steps through param space for different model variants; `inherit-template.c` takes finer steps, and `inherit-template-ts.c` records specific time series behaviour. `inherit-comp.c` and `inherit-comp-single.c` run the competition experiments where different strategies evolve together, respectively for a repeatedly-switching and once-switching environmental change regime.
+`inherit-old.c` takes coarse-grained steps through param space for different model variants; `inherit-template.c` takes finer steps, and `inherit-template-ts.c` records specific time series behaviour. `inherit-comp.c` and `inherit-comp-single.c` run the competition experiments where different strategies evolve together, respectively for a repeatedly-switching and once-switching environmental change regime. 
 
-Some legacy code is included due to the history of the project: `Inheritance_algorithm.py` is Python code for the same type of simulation, but works rather more slowly. `Inherit_comparison.py` is this code looking at a subset of parameter space, for comparison with the C code. 
+The bulk of the work is done by `inherit-template.c`. This has command-line structure (if the executable is called `inherit-template.ce`)
+
+`./inherit-template.ce [Npop] [initially homoplasmic organisms?] [environmental change period] [fitness scale] [heteroplasmy penalty] [deterministic reamp?] [deterministic leakage?] [templating rate] [rel int fitness of B allele] [rel int fitness of C allele] [cluster size]`
+
+So that, for example,
+
+`./inherit-template.ce 100 1 32 0.5 0 0 0 0.001 1 1 1`
+
+Runs a simulation with 100 initially homoplasmic individuals, environment change after 32 generations, non-optimal allele contributing 0.5 to fitness, zero heteroplasmy penalty, stochastic reamplification and leakage, undirected repair rate 0.001, equal fitnesses of A, B, and C alleles, and individual oDNAs (cluster size 1) inherited.
+
+Awkwardly, to distinguish *directed* repair, we use the templating rate argument but with a negative value:
+
+`./inherit-template.ce 100 1 32 0.5 0 0 0 -0.001 1 1 1`
+
+This is a legacy code issue and will be refactored in future. Some other legacy code is included due to the history of the project: `Inheritance_algorithm.py` is Python code for the same type of simulation, but works rather more slowly. `Inherit_comparison.py` is this code looking at a subset of parameter space, for comparison with the C code. 
