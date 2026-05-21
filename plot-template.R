@@ -6,11 +6,10 @@ library(metR)
 library(ggpubr)
 
 # time series demonstrations
-
 df1 = read.csv("inherit-template-full-out-10-1-0-0.500-0.000-0-0-0.00000.csv")
-expt.1 = df1[df1$t < 50,]
-
 df2 = read.csv("inherit-template-full-out-10-1-8-0.500-0.000-0-0-0.00000.csv")
+
+expt.1 = df1[df1$t < 50,]
 expt.2 = df2[df2$t < 50,]
 
 # function producting a plot summarising dynamics for a given subset of observations
@@ -156,8 +155,9 @@ ggplot(means.df[means.df$env==10,]) +
 # general function to read in data output
 read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5, 
                          penalty = 0, TEMPLATE = 0, FITNESSB = 1, FITNESSC = 1, CLUSTER = 1,
-                         code.ver = 2) {
+                         code.ver = 0) {
   mdf = data.frame()
+  
   for(env in c(0, 2**(1:7))) {
   if(code.ver == 1) {
     fname = sprintf("inherit-template-change-out-%i-%i-%i-%.3f-%.3f-0-0-%.5f.csv", 
@@ -173,6 +173,7 @@ read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5,
     tdf = read.csv(fname)
     mdf = rbind(mdf, tdf)
   }
+
   return( mdf %>% 
     group_by(leakage, DUI, nDNA, mu, env) %>%
     summarize(mean_f = mean(end.mean.f/nDNA))
@@ -182,6 +183,7 @@ read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5,
 # default experiment NB filename system updates
 means.df.100 = read.datafile()
 
+srcd = wd
 ## smaller population size
 means.df.50 = read.datafile(NPOP = 50)
 ## larger population size
@@ -207,16 +209,25 @@ means.df.100.temp.1 = read.datafile(TEMPLATE = 0.001)
 means.df.100.temp.2 = read.datafile(TEMPLATE = 0.1)
 
 ## DIRECTED templated repair rate 1
-means.df.100.dtemp.1 = read.datafile(TEMPLATE = -0.001)
+srcd = "~/Dropbox/Documents/2025_Projects/Belen/odna-inheritance-main 4/"
+means.df.100.dtemp.1 = read.datafile(TEMPLATE = -0.001, code.ver = 2)
 
 # different cluster sizes
-means.df.100.c2 = read.datafile(CLUSTER=2)
-means.df.100.c10 = read.datafile(CLUSTER=10)
+means.df.100.c2 = read.datafile(CLUSTER=2, code.ver = 2)
+means.df.100.c10 = read.datafile(CLUSTER=10, code.ver = 2)
 
 mu.set = c(0,0.0001,0.01)
 env.set = c(2, 8, 16, 64)
 strip.pos = "top"
-arrangement = facet_grid(env ~ mu)
+arrangement = facet_grid(
+  rows = vars(env),
+  cols = vars(mu),
+  labeller = labeller(
+    env = function(x) paste0("τ = ", x),
+    mu  = function(x) paste0("μ = ", x)
+  )
+)
+#facet_grid(paste("τ = ", env) ~ paste("μ = ", mu))
 
 g.format = list(geom_tile(aes(x=leakage, y=nDNA, fill=mean_f)),
                 scale_x_continuous(trans = "log", labels = function(x) format(x, scientific = TRUE), breaks = c(1e-3, 1e-2, 1e-1, 1)),
@@ -277,18 +288,25 @@ ggplot(wdf, aes(x=leakage, y=nDNA, fill=pred)) + geom_tile() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   facet_grid(env ~ mu)
 
-for(expt.detail in c(0, 1)) {
+diffmu = scale_fill_gradientn(colors = c("black", "blue", "white", "red", "red"), values = c(1, 1-1e-3, 0.5, 0.49, 0), limits=c(0,1))
+
+for(expt.detail in c(0, 1, 2)) {
   if(expt.detail == 0) {
     mu.set = c(0.01)
     env.set = c(64)
     strip.pos = "none"
     arrangement = NULL
-  } else {
+  } else if(expt.detail == 1) {
     mu.set = c(0,0.0001,0.01)
     env.set = c(2, 8, 16, 64)
     strip.pos = "top"
     arrangement = facet_grid(env ~ mu)
-  }
+  } else {
+      mu.set = c(0.0001)
+      env.set = c(64)
+      strip.pos = "none"
+      arrangement = NULL
+    } 
   
   g.sub.100.0 = ggplot(pull.set(means.df.100)) + g.format + ggtitle("Standard")
   g.sub.100.1 = ggplot(pull.set(means.df.100, DUI=1)) + g.format + ggtitle("DUI")
@@ -328,7 +346,7 @@ for(expt.detail in c(0, 1)) {
                     labels=c("A", "B", "C", "D", "E", "F", "G", "H", "I"),
                     ncol=3,nrow=3))
     dev.off()
-  } else {
+  } else if(expt.detail == 1) {
     png("all-trellises-update-full.png", width=1200*sf, height=1200*sf, res=72*sf)
     print(ggarrange(g.sub.100.0+nl, g.sub.50.0+nl, g.sub.200.0+nl, 
                     g.sub.100.1+nl, 
@@ -346,9 +364,25 @@ for(expt.detail in c(0, 1)) {
                     labels=c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"),
                     ncol=4,nrow=3))
     dev.off()
+  } else {
+      png("all-trellises-update-new.png", width=900*sf, height=900*sf, res=72*sf)
+      print(ggarrange(g.sub.100.0+nl+diffmu, g.sub.50.0+nl+diffmu, g.sub.200.0+nl+diffmu, 
+                      g.sub.100.1+nl+diffmu, g.sub.100.dtemp.1.0+nl+diffmu, g.sub.hetpen.0+nl+diffmu, 
+                      g.sub.fit.neg.b+nl+diffmu, g.sub.fit.pos.c+nl+diffmu,
+                      g.sub.100.c10+nl+diffmu,
+                      # g.sub.fit.pos.c.template+nl,
+                      #labels=c("A. Default", "B. Small popn", "C. Large popn", "D. DUI", "E. Repair", "F. h penalty"),
+                      labels=c("A", "B", "C", "D", "E", "F", "G", "H", "I"),
+                      ncol=3,nrow=3))
+      dev.off()
+    }
   }
 
 }
+
+g.sub.100.0+nl + 
+  scale_fill_gradientn(colors = c("black", "blue", "white", "red", "red"), values = c(1, 1-1e-3, 0.5, 0.49, 0), limits=c(0,1))
+
 
 png("main-text-trellis.png", width=600*sf, height=600*sf, res=72*sf)
 print(g.all.100.0 + labs(x="Leakage", y="N", fill="Mean\nfitness"))
@@ -402,10 +436,14 @@ model.R2(sub2$mean_f, 1-sub2$mu*sqrt(sub2$nDNA)/(sub2$lambda*(1-sub2$leakage))/(
 ggplot(sub2, aes(x=roze, y=mean_f, color=factor(leakage))) + 
   geom_point() + geom_abline()
 
+
 png("plot-align-empirical.png", width=400*sf, height=300*sf, res=72*sf)
 ggplot(sub2, aes(x=1-mu*sqrt(nDNA)/(1-leakage)**2, y=mean_f, color=factor(leakage))) + 
   theme_light() + labs(color="Leakage", x="Empirical prediction", y="Mean fitness in simulation") +
-  geom_point() + geom_abline()
+  geom_abline() +
+  geom_point(size=4, alpha = 0.4) +  scale_color_manual(values = colorRampPalette(
+    c("#ff0000", "#0000ff")
+  )(length(unique(sub2$leakage))))
 dev.off()
 
 ### empirical where is best?
