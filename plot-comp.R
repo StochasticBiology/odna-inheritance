@@ -50,16 +50,19 @@ plot.f.1= ggplot(means.1, aes(x=factor(mu), y=env, fill=mm.f)) + geom_tile() +
   scale_y_continuous(transform="log2") + 
   scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.75, 0), limits=c(0.8,1))  +
   labs(x="Mutation rate", y="Env change period", fill="Popn mean\nfitness") +
+  theme_light() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 plot.n.1 = ggplot(means.1, aes(x=factor(mu), y=env, fill=mm.NDNA)) + geom_tile() + 
   scale_y_continuous(transform="log2") + 
   scale_fill_viridis(option="inferno") +
   labs(x="Mutation rate", y="Env change period", fill="Popn mean\nploidy") +
+  theme_light() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 plot.lambda.1 = ggplot(means.1, aes(x=factor(mu), y=env, fill=mm.leak)) + geom_tile() + 
   scale_y_continuous(transform="log2")+ 
   scale_fill_viridis(option="inferno") +
   labs(x="Mutation rate", y="Env change period", fill="Popn mean\nleakage") +
+  theme_light() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # fitness, mean N, mean lambda plots
@@ -67,29 +70,37 @@ plot.f.2= ggplot(means.2, aes(x=factor(mu), y=env, fill=mm.f)) + geom_tile() +
   scale_y_continuous(transform="log2") + 
   scale_fill_gradientn(colors = c("black", "blue", "white", "red"), values = c(1, 1-1e-3, 0.75, 0), limits=c(0.8,1))  +
   labs(x="Mutation rate", y="Env change period", fill="Popn mean\nfitness") +
+  theme_light() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 plot.n.2 = ggplot(means.2, aes(x=factor(mu), y=env, fill=mm.NDNA)) + geom_tile() + 
   scale_y_continuous(transform="log2") + 
   scale_fill_viridis(option="inferno") +
   labs(x="Mutation rate", y="Env change period", fill="Popn mean\nploidy") +
+  theme_light() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 plot.lambda.2 = ggplot(means.2, aes(x=factor(mu), y=env, fill=mm.leak)) + geom_tile() + 
   scale_y_continuous(transform="log2")+ 
   scale_fill_viridis(option="inferno") +
   labs(x="Mutation rate", y="Env change period", fill="Popn mean\nleakage") +
+  theme_light() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggarrange(plot.n.1, plot.lambda.1,
-          plot.n.2, plot.lambda.2, nrow=2, ncol=2, labels=c("A", "B", "C", "D"))
+ggarrange(plot.n.1 , plot.lambda.1,
+          plot.n.2, plot.lambda.2, nrow=2, ncol=2, 
+          label.x = 0.02, label.y = 1.065, hjust = 0,
+          labels=c("A. Single change\ni", "\nii", "B. Periodic switching\ni", "\nii"))
 
 sf = 2
 png("optimal-behaviour.png", width=600*sf, height=400*sf, res=72*sf)
 ggarrange(plot.n.1, plot.lambda.1,
-          plot.n.2, plot.lambda.2, nrow=2, ncol=2, labels=c("A", "B", "C", "D"))
+          plot.n.2, plot.lambda.2, nrow=2, ncol=2, 
+          label.x = 0.02, label.y = 1.07, hjust = 0,
+          labels=c("A. Single change\n          i", "\n          ii", "B. Periodic switching\n          i", "\n          ii"))
 
-#ggarrange(plot.f, plot.n, plot.lambda, nrow=1)
+
 dev.off()
 
+ggarrange(plot.f.1, plot.n.1, plot.lambda.1, nrow=1)
 # linear model for influences
 summary(lm(mean.NDNA ~ env + mu, data=df[df$t==499,]))
 summary(lm(mean.leak ~ env + mu, data=df[df$t==499,]))
