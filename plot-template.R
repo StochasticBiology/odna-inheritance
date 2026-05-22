@@ -183,7 +183,6 @@ read.datafile = function(NPOP = 100, ICs = 1, scale = 0.5,
 # default experiment NB filename system updates
 means.df.100 = read.datafile()
 
-srcd = wd
 ## smaller population size
 means.df.50 = read.datafile(NPOP = 50)
 ## larger population size
@@ -209,7 +208,6 @@ means.df.100.temp.1 = read.datafile(TEMPLATE = 0.001)
 means.df.100.temp.2 = read.datafile(TEMPLATE = 0.1)
 
 ## DIRECTED templated repair rate 1
-srcd = "~/Dropbox/Documents/2025_Projects/Belen/odna-inheritance-main 4/"
 means.df.100.dtemp.1 = read.datafile(TEMPLATE = -0.001, code.ver = 2)
 
 # different cluster sizes
